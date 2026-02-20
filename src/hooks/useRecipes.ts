@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Recipe } from "@/components/ui/RecipeCard";
+import { supabase } from "@/lib/supabase";
 
 export const GERMAN_CLASSICS: Recipe[] = [
     {
@@ -18,37 +19,166 @@ export const GERMAN_CLASSICS: Recipe[] = [
     }
 ];
 
-export function useRecipes() {
+export function useRecipes(userId?: string | null) {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem("kombuesen_recipes");
-        if (saved) {
-            setRecipes(JSON.parse(saved));
-        } else {
-            setRecipes(GERMAN_CLASSICS);
-            localStorage.setItem("kombuesen_recipes", JSON.stringify(GERMAN_CLASSICS));
-        }
-        setIsLoaded(true);
-    }, []);
+        let isMounted = true;
 
-    const addRecipe = (recipe: Recipe) => {
-        const next = [recipe, ...recipes];
-        setRecipes(next);
-        localStorage.setItem("kombuesen_recipes", JSON.stringify(next));
+        const fetchRecipes = async () => {
+            try {
+                // 1. Fetch system recipes and user's own recipes
+                let query = supabase.from('recipes').select('*').or(`is_system_recipe.eq.true${userId ? `,user_id.eq.${userId}` : ''}`);
+                const { data: recipesData, error: recipesError } = await query;
+
+                if (recipesError) throw recipesError;
+
+                let mergedRecipes: Recipe[] = [];
+
+                if (recipesData) {
+                    // Map DB format to Recipe interface
+                    mergedRecipes = recipesData.map(r => ({
+                        id: r.id,
+                        title: r.title,
+                        image_url: r.image_url,
+                        ingredients: r.ingredients,
+                        steps: r.steps,
+                        creator_id: r.user_id,
+                        is_system_recipe: r.is_system_recipe
+                    }));
+                }
+
+                // 2. Fetch user's favorites if logged in
+                if (userId && mergedRecipes.length > 0) {
+                    const { data: favData, error: favError } = await supabase
+                        .from('favorites')
+                        .select('recipe_id')
+                        .eq('user_id', userId);
+
+                    if (!favError && favData) {
+                        const favIds = new Set(favData.map(f => f.recipe_id));
+                        mergedRecipes = mergedRecipes.map(r => ({
+                            ...r,
+                            is_favorite: favIds.has(r.id)
+                        }));
+                    }
+                }
+
+                // Fallback to local GERMAN_CLASSICS if DB is empty/unseeded
+                if (mergedRecipes.length === 0) {
+                    mergedRecipes = GERMAN_CLASSICS;
+                }
+
+                if (isMounted) {
+                    setRecipes(mergedRecipes);
+                    setIsLoaded(true);
+                }
+
+            } catch (err) {
+                console.error("Error fetching recipes:", err);
+                if (isMounted) {
+                    setRecipes(GERMAN_CLASSICS);
+                    setIsLoaded(true);
+                }
+            }
+        };
+
+        fetchRecipes();
+
+        return () => { isMounted = false; };
+    }, [userId]);
+
+    const addRecipe = async (recipe: Omit<Recipe, 'id'>) => {
+        // Optimistic UI update
+        const tempId = `temp-${Date.now()}`;
+        const newRecipe = { ...recipe, id: tempId, creator_id: userId };
+        setRecipes(prev => [newRecipe as Recipe, ...prev]);
+
+        if (!userId) return; // Must be logged in to save to DB
+
+        const { data, error } = await supabase
+            .from('recipes')
+            .insert({
+                user_id: userId,
+                title: recipe.title,
+                ingredients: recipe.ingredients,
+                steps: recipe.steps,
+                image_url: recipe.image_url,
+                is_system_recipe: false
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error adding recipe:", error);
+            // Revert optimistic update
+            setRecipes(prev => prev.filter(r => r.id !== tempId));
+        } else if (data) {
+            // Replace temp ID with real DB UUID
+            setRecipes(prev => prev.map(r => r.id === tempId ? { ...r, id: data.id } : r));
+        }
     };
 
-    const updateRecipe = (updated: Recipe) => {
-        const next = recipes.map(r => r.id === updated.id ? updated : r);
-        setRecipes(next);
-        localStorage.setItem("kombuesen_recipes", JSON.stringify(next));
+    const updateRecipe = async (updated: Recipe) => {
+        // Optimistic UI update
+        const previousState = [...recipes];
+        const previousRecipe = recipes.find(r => r.id === updated.id);
+
+        setRecipes(prev => prev.map(r => r.id === updated.id ? updated : r));
+
+        if (!userId) return;
+
+        try {
+            // Check if favorite status changed
+            if (previousRecipe && previousRecipe.is_favorite !== updated.is_favorite) {
+                if (updated.is_favorite) {
+                    await supabase.from('favorites').insert({ user_id: userId, recipe_id: updated.id });
+                } else {
+                    await supabase.from('favorites').delete().eq('user_id', userId).eq('recipe_id', updated.id);
+                }
+            }
+
+            // Update recipe data if user is creator
+            if (updated.creator_id === userId) {
+                const { error } = await supabase
+                    .from('recipes')
+                    .update({
+                        title: updated.title,
+                        ingredients: updated.ingredients,
+                        steps: updated.steps,
+                        image_url: updated.image_url
+                    })
+                    .eq('id', updated.id)
+                    .eq('user_id', userId);
+
+                if (error) throw error;
+            }
+        } catch (error) {
+            console.error("Error updating recipe:", error);
+            // Revert optimistic update
+            setRecipes(previousState);
+        }
     }
 
-    const deleteRecipe = (id: string) => {
-        const next = recipes.filter(r => r.id !== id);
-        setRecipes(next);
-        localStorage.setItem("kombuesen_recipes", JSON.stringify(next));
+    const deleteRecipe = async (id: string) => {
+        // Optimistic UI update
+        const previousState = [...recipes];
+        setRecipes(prev => prev.filter(r => r.id !== id));
+
+        if (!userId || String(id).startsWith('system-')) return;
+
+        const { error } = await supabase
+            .from('recipes')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', userId);
+
+        if (error) {
+            console.error("Error deleting recipe:", error);
+            // Revert optimistic update
+            setRecipes(previousState);
+        }
     }
 
     return { recipes, isLoaded, addRecipe, updateRecipe, deleteRecipe };

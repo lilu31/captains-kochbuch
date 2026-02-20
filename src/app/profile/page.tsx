@@ -6,16 +6,38 @@ import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
 import { ArrowLeft, BookOpen, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 import { useRecipes } from "@/hooks/useRecipes";
 
 export default function ProfilePage() {
-    const MOCK_CURRENT_USER_ID = "user-1";
-    const { recipes, isLoaded, updateRecipe, deleteRecipe } = useRecipes();
+    const router = useRouter();
+    const [userId, setUserId] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const { recipes, isLoaded: recipesLoaded, updateRecipe, deleteRecipe } = useRecipes(userId);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                router.push('/login');
+            } else {
+                setUserId(session.user.id);
+                setUserEmail(session.user.email || null);
+            }
+        };
+        checkUser();
+    }, [router]);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/');
+    };
 
     // Only show recipes that the user favorited OR created themselves
-    const savedRecipes = recipes.filter(r => r.is_favorite || r.creator_id === MOCK_CURRENT_USER_ID);
+    const savedRecipes = recipes.filter(r => r.is_favorite || r.creator_id === userId);
 
     const handleDelete = (id: string) => {
         deleteRecipe(id);
@@ -32,7 +54,7 @@ export default function ProfilePage() {
         updateRecipe(updatedRecipe);
     };
 
-    if (!isLoaded) return null;
+    if (!userId || !recipesLoaded) return null; // Wait for auth and DB to load
 
     return (
         <main className="min-h-screen p-4 md:p-8 flex flex-col relative overflow-hidden bg-ruby-900">
@@ -49,11 +71,12 @@ export default function ProfilePage() {
                     </ChunkyButton>
                 </Link>
 
-                <Link href="/">
-                    <ChunkyButton variant="danger" size="sm" className="gap-2">
-                        Logbuch schließen <LogOut className="w-4 h-4 ml-1" />
+                <div className="flex flex-col items-end">
+                    <p className="text-gold-300 font-bold uppercase tracking-widest text-sm mb-6">{userEmail}</p>
+                    <ChunkyButton variant="secondary" size="lg" className="gap-2 mb-4 w-full justify-center" onClick={handleLogout}>
+                        <LogOut className="w-5 h-5 text-white" /> Logout
                     </ChunkyButton>
-                </Link>
+                </div>
             </header>
 
             <div className="flex-1 w-full max-w-5xl mx-auto z-10">
@@ -80,15 +103,16 @@ export default function ProfilePage() {
                     </TreasureCard>
                 ) : (
                     <div className="grid grid-cols-1 gap-12 pb-20">
-                        {savedRecipes.map(recipe => (
+                        {savedRecipes.map((recipe) => (
                             <motion.div key={recipe.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                                 <RecipeCard
+                                    key={recipe.id}
                                     recipe={recipe}
-                                    showActions={true}
-                                    currentUserId={MOCK_CURRENT_USER_ID}
+                                    currentUserId={userId}
                                     onFavorite={handleFavorite}
                                     onDelete={handleDelete}
                                     onEdit={handleEdit}
+                                    showActions={true}
                                 />
                             </motion.div>
                         ))}

@@ -9,10 +9,23 @@ import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship } from "lucide
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRecipes } from "@/hooks/useRecipes";
+import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 
 export default function CookupPage() {
-    const MOCK_CURRENT_USER_ID = "user-1";
-    const { addRecipe } = useRecipes();
+    const [userId, setUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                setUserId(session.user.id);
+            }
+        };
+        checkUser();
+    }, []);
+
+    const { addRecipe } = useRecipes(userId);
     const [ingredients, setIngredients] = useState<string[]>([]);
     const [steps, setSteps] = useState<string[]>([]);
     const [currentInput, setCurrentInput] = useState("");
@@ -86,7 +99,7 @@ export default function CookupPage() {
                 image_url: imagePreview || aiImageUrl,
                 ingredients: data.ingredients || ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: data.steps || steps,
-                creator_id: MOCK_CURRENT_USER_ID
+                creator_id: userId || undefined
             };
 
             setRecipe(newRecipe);
@@ -101,7 +114,7 @@ export default function CookupPage() {
                 image_url: imagePreview || fallbackImageUrl,
                 ingredients: ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: steps.length > 0 ? steps : ["Zubereitung fehlt."],
-                creator_id: MOCK_CURRENT_USER_ID
+                creator_id: userId || undefined
             };
             // Fallback
             setRecipe(fallbackRecipe);
@@ -303,7 +316,7 @@ export default function CookupPage() {
                             <RecipeCard
                                 recipe={recipe}
                                 showActions={true}
-                                currentUserId={MOCK_CURRENT_USER_ID}
+                                currentUserId={userId || undefined}
                                 onEdit={setRecipe}
                             />
                         </motion.div>

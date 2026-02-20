@@ -5,8 +5,53 @@ import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import { ArrowLeft, Anchor, Lock, Mail } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+    const handleEmailLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+        } else {
+            router.push('/profile');
+        }
+    };
+
+    const handleSignUp = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+        });
+
+        if (error) {
+            setError(error.message);
+        } else {
+            setError("Bestätigungsflaschenpost wurde verschickt! (Check dein Email-Postfach)");
+        }
+        setLoading(false);
+    };
+
     return (
         <main className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-center relative overflow-hidden">
             {/* Background */}
@@ -34,13 +79,21 @@ export default function LoginPage() {
                     <h1 className="text-3xl font-black text-gold-500 text-glow-gold uppercase tracking-wider mb-2">Meine Kajüte</h1>
                     <p className="text-gold-100 mb-8 font-bold">Logbuch-Eintrag erforderlich. Tritt ein und speichere deine besten Rezepte.</p>
 
-                    <form className="space-y-4 text-left" onSubmit={(e) => e.preventDefault()}>
+                    {error && (
+                        <div className="bg-coral-red/20 border-2 border-coral-red text-white p-3 rounded-lg mb-6 text-sm font-bold">
+                            {error}
+                        </div>
+                    )}
+
+                    <form className="space-y-4 text-left" onSubmit={handleEmailLogin}>
                         <div>
                             <label className="block text-sm font-bold text-gold-300 mb-1 ml-1 uppercase">Flaschenpost-Adresse</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gold-700" />
                                 <input
                                     type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="matrose@meer.de"
                                     className="w-full bg-treasure-wood-dark border-4 border-gold-900 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-gold-500 transition font-bold"
                                 />
@@ -53,6 +106,8 @@ export default function LoginPage() {
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gold-700" />
                                 <input
                                     type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     className="w-full bg-treasure-wood-dark border-4 border-gold-900 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-gold-500 transition font-bold"
                                 />
@@ -60,14 +115,14 @@ export default function LoginPage() {
                         </div>
 
                         <div className="pt-4">
-                            <Link href="/profile">
-                                <ChunkyButton size="lg" className="w-full">Luke öffnen</ChunkyButton>
-                            </Link>
+                            <ChunkyButton type="submit" size="lg" className="w-full" disabled={loading}>
+                                {loading ? "Lädt..." : "Luke öffnen"}
+                            </ChunkyButton>
                         </div>
                     </form>
 
                     <div className="mt-6 text-sm text-gold-300 font-bold">
-                        Neuer Matrose? <a href="#" className="flex-1 text-gold-500 font-black hover:underline uppercase tracking-wide">Heuere hier an.</a>
+                        Neuer Matrose? <button onClick={handleSignUp} disabled={loading} className="flex-1 text-gold-500 font-black hover:underline uppercase tracking-wide">Heuere hier an.</button>
                     </div>
                 </TreasureCard>
             </motion.div>
