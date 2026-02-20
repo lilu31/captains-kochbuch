@@ -91,7 +91,7 @@ export default function CookupPage() {
             const data = await res.json();
 
             const generatedTitle = data.title || recipeTitle || "Neues Rezept";
-            const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(generatedTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
+            const aiImageUrl = `https://pollinations.ai/p/${encodeURIComponent(generatedTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
 
             const newRecipe = {
                 id: `generated-${Date.now()}`,
@@ -107,7 +107,7 @@ export default function CookupPage() {
         } catch (error) {
             console.error(error);
             const fallbackTitle = recipeTitle || "Nautischer Eintopf";
-            const fallbackImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
+            const fallbackImageUrl = `https://pollinations.ai/p/${encodeURIComponent(fallbackTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
             const fallbackRecipe = {
                 id: `generated-${Date.now()}`,
                 title: fallbackTitle,

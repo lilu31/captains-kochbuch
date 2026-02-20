@@ -6,14 +6,14 @@ export const GERMAN_CLASSICS: Recipe[] = [
     {
         id: "system-1",
         title: "Affogato",
-        image_url: `https://image.pollinations.ai/prompt/Affogato%203d%20cartoon%20style%20delicious%20food%20shiny%20vibrant%20colorful?width=1200&height=800&nologo=true`,
+        image_url: `https://pollinations.ai/p/Affogato%203d%20cartoon%20style%20delicious%20food%20shiny%20vibrant%20colorful?width=1200&height=800&nologo=true`,
         ingredients: [{ amount: "1 Kugel", item: "Vanilleeis" }, { amount: "1 Shot", item: "Heißer Espresso" }],
         steps: ["Vanilleeis in ein Glas geben.", "Heißen Espresso darüber gießen.", "Sofort genießen."]
     },
     {
         id: "system-2",
         title: "Kartoffeln mit Spinat und Spiegelei",
-        image_url: `https://image.pollinations.ai/prompt/Kartoffeln%20mit%20Spinat%20und%20Spiegelei%203d%20cartoon%20style%20delicious%20food%20shiny%20vibrant%20colorful?width=1200&height=800&nologo=true`,
+        image_url: `https://pollinations.ai/p/Kartoffeln%20mit%20Spinat%20und%20Spiegelei%203d%20cartoon%20style%20delicious%20food%20shiny%20vibrant%20colorful?width=1200&height=800&nologo=true`,
         ingredients: [{ amount: "500g", item: "Kartoffeln" }, { amount: "300g", item: "Blattspinat" }, { amount: "2", item: "Eier" }, { amount: "1 Prise", item: "Muskatnuss" }],
         steps: ["Kartoffeln schälen und in Salzwasser kochen, bis sie weich sind.", "Spinat in einer Pfanne andünsten und mit Salz, Pfeffer und einer Prise Muskatnuss abschmecken.", "In der Zwischenzeit die Spiegeleier in einer separaten Pfanne braten.", "Kartoffeln, Spinat und Spiegeleier zusammen auf einem Teller anrichten und servieren."]
     }
