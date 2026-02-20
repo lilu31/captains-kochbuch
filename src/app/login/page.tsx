@@ -14,48 +14,51 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isSignUp, setIsSignUp] = useState(false);
     const router = useRouter();
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        } else {
-            router.push('/profile');
+        if (!email || !password) {
+            setError("Bitte fülle alle Felder aus.");
+            return;
         }
-    };
 
-    const handleSignUp = async (e: React.MouseEvent) => {
-        e.preventDefault();
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-        });
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        } else {
-            // Since email confirmation is off, try to log them in immediately
-            const { error: loginError } = await supabase.auth.signInWithPassword({
+        if (isSignUp) {
+            const { error } = await supabase.auth.signUp({
                 email,
                 password,
             });
 
-            if (loginError) {
-                setError("Konto erstellt! Bitte logge dich oben ein.");
+            if (error) {
+                setError(error.message);
+                setLoading(false);
+            } else {
+                // Try to log them in immediately after signup
+                const { error: loginError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (loginError) {
+                    setError("Konto erstellt! Bitte logge dich ein.");
+                    setIsSignUp(false);
+                    setLoading(false);
+                } else {
+                    router.push('/profile');
+                }
+            }
+        } else {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) {
+                setError(error.message);
                 setLoading(false);
             } else {
                 router.push('/profile');
@@ -88,7 +91,9 @@ export default function LoginPage() {
                 <TreasureCard variant="wood" className="p-8 text-center border-4 border-gold-900">
                     <Anchor className="w-16 h-16 text-gold-500 mx-auto mb-4" />
                     <h1 className="text-3xl font-black text-gold-500 text-glow-gold uppercase tracking-wider mb-2">Meine Kajüte</h1>
-                    <p className="text-gold-100 mb-8 font-bold">Logbuch-Eintrag erforderlich. Tritt ein und speichere deine besten Rezepte.</p>
+                    <p className="text-gold-100 mb-8 font-bold">
+                        {isSignUp ? "Registriere dich als neuer Matrose, um Rezepte zu speichern." : "Logbuch-Eintrag erforderlich. Tritt ein und speichere deine besten Rezepte."}
+                    </p>
 
                     {error && (
                         <div className="bg-coral-red/20 border-2 border-coral-red text-white p-3 rounded-lg mb-6 text-sm font-bold">
@@ -96,7 +101,7 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    <form className="space-y-4 text-left" onSubmit={handleEmailLogin}>
+                    <form className="space-y-4 text-left" onSubmit={handleSubmit}>
                         <div>
                             <label className="block text-sm font-bold text-gold-300 mb-1 ml-1 uppercase">Flaschenpost-Adresse</label>
                             <div className="relative">
@@ -127,13 +132,13 @@ export default function LoginPage() {
 
                         <div className="pt-4">
                             <ChunkyButton type="submit" size="lg" className="w-full" disabled={loading}>
-                                {loading ? "Lädt..." : "Luke öffnen"}
+                                {loading ? "Lädt..." : (isSignUp ? "Anheuern" : "Luke öffnen")}
                             </ChunkyButton>
                         </div>
                     </form>
 
                     <div className="mt-6 text-sm text-gold-300 font-bold">
-                        Neuer Matrose? <button onClick={handleSignUp} disabled={loading} className="flex-1 text-gold-500 font-black hover:underline uppercase tracking-wide">Heuere hier an.</button>
+                        {isSignUp ? "Schon an Bord?" : "Neuer Matrose?"} <button onClick={() => setIsSignUp(!isSignUp)} disabled={loading} className="flex-1 text-gold-500 font-black hover:underline uppercase tracking-wide">{isSignUp ? "Logbuch aufschlagen" : "Heuere hier an."}</button>
                     </div>
                 </TreasureCard>
             </motion.div>
