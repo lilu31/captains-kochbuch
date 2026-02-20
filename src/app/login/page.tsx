@@ -46,10 +46,21 @@ export default function LoginPage() {
 
         if (error) {
             setError(error.message);
+            setLoading(false);
         } else {
-            setError("Bestätigungsflaschenpost wurde verschickt! (Check dein Email-Postfach)");
+            // Since email confirmation is off, try to log them in immediately
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (loginError) {
+                setError("Konto erstellt! Bitte logge dich oben ein.");
+                setLoading(false);
+            } else {
+                router.push('/profile');
+            }
         }
-        setLoading(false);
     };
 
     return (
