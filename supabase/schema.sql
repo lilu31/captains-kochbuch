@@ -12,6 +12,7 @@ create table public.recipes (
   steps jsonb not null,
   image_url text,
   is_system_recipe boolean default false,
+  author_email text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -30,13 +31,9 @@ alter table public.recipes enable row level security;
 alter table public.favorites enable row level security;
 
 -- Recipes Policies
-create policy "Public system recipes are viewable by everyone."
+create policy "All recipes are viewable by everyone."
   on public.recipes for select
-  using ( is_system_recipe = true );
-
-create policy "Users can view their own recipes."
-  on public.recipes for select
-  using ( auth.uid() = user_id );
+  using ( true );
 
 create policy "Users can insert their own recipes."
   on public.recipes for insert
