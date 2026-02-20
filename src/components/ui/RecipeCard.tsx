@@ -12,6 +12,8 @@ export interface Recipe {
     image_url: string;
     is_favorite?: boolean;
     creator_id?: string;
+    author_email?: string;
+    is_system_recipe?: boolean;
 }
 
 interface RecipeCardProps {
@@ -145,9 +147,11 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                     ) : (
                         <h2 className="text-3xl md:text-4xl font-black text-gold-500 text-glow-gold uppercase tracking-wider mb-2 drop-shadow-lg">{recipe.title}</h2>
                     )}
-                    <div className="flex items-center gap-4 text-gold-100 text-sm font-bold uppercase tracking-wide">
+                    <div className="flex flex-wrap items-center gap-4 text-gold-100 text-sm font-bold uppercase tracking-wide">
                         <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner"><Clock className="w-4 h-4 text-gold-300" /> ca. 30 Min</div>
-                        <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner"><ChefHat className="w-4 h-4 text-gold-300" /> Schwierigkeit: Mittel</div>
+                        <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner">
+                            <ChefHat className="w-4 h-4 text-gold-300" /> {recipe.author_email ? recipe.author_email.split('@')[0] : (recipe.is_system_recipe ? "Smutje Klassiker" : "Unbekannter Matrose")}
+                        </div>
                     </div>
                 </div>
             </div>

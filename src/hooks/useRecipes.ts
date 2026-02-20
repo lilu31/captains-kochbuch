@@ -19,7 +19,7 @@ export const GERMAN_CLASSICS: Recipe[] = [
     }
 ];
 
-export function useRecipes(userId?: string | null) {
+export function useRecipes(userId?: string | null, userEmail?: string | null) {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -29,7 +29,7 @@ export function useRecipes(userId?: string | null) {
         const fetchRecipes = async () => {
             try {
                 // 1. Fetch system recipes and user's own recipes
-                let query = supabase.from('recipes').select('*').or(`is_system_recipe.eq.true${userId ? `,user_id.eq.${userId}` : ''}`);
+                let query = supabase.from('recipes').select('*');
                 const { data: recipesData, error: recipesError } = await query;
 
                 if (recipesError) throw recipesError;
@@ -45,6 +45,7 @@ export function useRecipes(userId?: string | null) {
                         ingredients: r.ingredients,
                         steps: r.steps,
                         creator_id: r.user_id,
+                        author_email: r.author_email,
                         is_system_recipe: r.is_system_recipe
                     }));
                 }
@@ -92,7 +93,7 @@ export function useRecipes(userId?: string | null) {
     const addRecipe = async (recipe: Omit<Recipe, 'id'>) => {
         // Optimistic UI update
         const tempId = `temp-${Date.now()}`;
-        const newRecipe = { ...recipe, id: tempId, creator_id: userId };
+        const newRecipe = { ...recipe, id: tempId, creator_id: userId, author_email: userEmail || undefined };
         setRecipes(prev => [newRecipe as Recipe, ...prev]);
 
         if (!userId) return; // Must be logged in to save to DB
@@ -105,6 +106,7 @@ export function useRecipes(userId?: string | null) {
                 ingredients: recipe.ingredients,
                 steps: recipe.steps,
                 image_url: recipe.image_url,
+                author_email: userEmail || undefined,
                 is_system_recipe: false
             })
             .select()

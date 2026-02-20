@@ -16,7 +16,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
     const [userEmail, setUserEmail] = useState<string | null>(null);
-    const { recipes, isLoaded: recipesLoaded, updateRecipe, deleteRecipe } = useRecipes(userId);
+    const { recipes, isLoaded: recipesLoaded, updateRecipe, deleteRecipe } = useRecipes(userId, userEmail);
 
     useEffect(() => {
         const checkUser = async () => {

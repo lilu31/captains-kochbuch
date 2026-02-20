@@ -14,18 +14,20 @@ import { useEffect } from "react";
 
 export default function CookupPage() {
     const [userId, setUserId] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
 
     useEffect(() => {
         const checkUser = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setUserId(session.user.id);
+                setUserEmail(session.user.email || null);
             }
         };
         checkUser();
     }, []);
 
-    const { addRecipe } = useRecipes(userId);
+    const { addRecipe } = useRecipes(userId, userEmail);
     const [ingredients, setIngredients] = useState<string[]>([]);
     const [steps, setSteps] = useState<string[]>([]);
     const [currentInput, setCurrentInput] = useState("");
