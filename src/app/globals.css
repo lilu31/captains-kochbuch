@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  /* Vibrant Cartoon Pirate Theme */
+  --color-ruby-900: #7a0010;
+  --color-ruby-700: #cc001a;
+  --color-ruby-500: #ff1a35;
+  --color-ruby-300: #ff667a;
+
+  --color-gold-900: #a37200;
+  --color-gold-700: #e6a100;
+  --color-gold-500: #ffc400;
+  /* Main coin gold */
+  --color-gold-300: #ffe166;
+  --color-gold-100: #fff9db;
+
+  --color-purple-900: #4a148c;
+  --color-purple-700: #7b1fa2;
+  --color-purple-500: #ab47bc;
+
+  --color-sky-700: #0277bd;
+  --color-sky-500: #29b6f6;
+  --color-sky-200: #81d4fa;
+
+  --color-treasure-wood: #5d4037;
+  --color-treasure-wood-dark: #3e2723;
+
+  --color-background: var(--color-ruby-900);
+  --color-foreground: #ffffff;
+  --font-sans: var(--font-outfit);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    /* Warm, vibrant radial gradient for the background */
+    background-image:
+      radial-gradient(circle at 50% 30%, var(--color-ruby-700) 0%, var(--color-ruby-900) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+/* Custom utility for chunky borders and glow */
+@layer utilities {
+  .border-chunky-gold {
+    border: 4px solid var(--color-gold-500);
+    box-shadow:
+      inset 0 0 10px rgba(255, 196, 0, 0.5),
+      0 8px 0px var(--color-gold-900),
+      0 15px 25px rgba(0, 0, 0, 0.5);
+  }
+
+  .border-chunky-wood {
+    border: 4px solid var(--color-gold-700);
+    box-shadow:
+      inset 0 0 15px rgba(0, 0, 0, 0.5),
+      0 8px 0px var(--color-treasure-wood-dark),
+      0 15px 25px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 10px var(--color-gold-500), 0 0 20px var(--color-gold-500);
+  }
+}
