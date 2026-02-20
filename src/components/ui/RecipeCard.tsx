@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { TreasureCard } from "./TreasureCard";
-import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera } from "lucide-react";
+import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw } from "lucide-react";
 import { ChunkyButton } from "./ChunkyButton";
 
 export interface Recipe {
@@ -32,6 +32,10 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
     const [editIngredients, setEditIngredients] = useState([...recipe.ingredients]);
     const [editSteps, setEditSteps] = useState([...recipe.steps]);
     const [editImageUrl, setEditImageUrl] = useState(recipe.image_url);
+
+    // Track image loading state to show spinner for slow AI generation
+    const currentDisplayImage = isEditing ? editImageUrl : (recipe.image_url || 'https://images.unsplash.com/photo-1548811579-017fc2a7ea68?q=80&w=1200');
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -81,9 +85,25 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
         <TreasureCard variant="wood" className="max-w-3xl w-full mx-auto p-0 overflow-hidden relative border-4 border-gold-900">
             {/* Header Image */}
             <div
-                className="w-full h-64 bg-treasure-wood-dark bg-cover bg-center relative border-b-4 border-gold-900"
-                style={{ backgroundImage: `url(${isEditing ? editImageUrl : (recipe.image_url || 'https://images.unsplash.com/photo-1548811579-017fc2a7ea68?q=80&w=1200')})` }}
+                className="w-full h-64 bg-treasure-wood-dark bg-cover bg-center relative border-b-4 border-gold-900 overflow-hidden"
+                style={{ backgroundImage: imageLoaded ? `url(${currentDisplayImage})` : 'none' }}
             >
+                {/* Hidden image just to trigger onLoad */}
+                <img
+                    src={currentDisplayImage}
+                    alt={recipe.title}
+                    className="hidden"
+                    onLoad={() => setImageLoaded(true)}
+                    onError={() => setImageLoaded(true)} // Fallback if it fails so it doesn't spin forever
+                />
+
+                {!imageLoaded && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-treasure-wood-dark">
+                        <RefreshCw className="w-8 h-8 text-gold-500 animate-spin mb-2" />
+                        <span className="text-gold-300 font-bold uppercase tracking-widest text-xs">Malt Bild...</span>
+                    </div>
+                )}
+
                 <div className="absolute inset-0 bg-gradient-to-t from-ruby-900 via-transparent to-transparent opacity-90" />
 
                 {isEditing && (

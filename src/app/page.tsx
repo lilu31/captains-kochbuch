@@ -8,38 +8,25 @@ import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import Link from "next/link";
 import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
 
-// Using the same mock data, but we'll present it differently
-const GERMAN_CLASSICS: Recipe[] = [
-  {
-    id: "1",
-    title: "Affogato",
-    image_url: "https://images.unsplash.com/photo-1594910243455-2d4e76c1dc1e?q=80&w=1200",
-    ingredients: [{ amount: "1 Kugel", item: "Vanilleeis" }, { amount: "1 Shot", item: "Heißer Espresso" }],
-    steps: ["Vanilleeis in ein Glas geben.", "Heißen Espresso darüber gießen.", "Sofort genießen."]
-  },
-  {
-    id: "2",
-    title: "Kartoffeln mit Spinat und Spiegelei",
-    image_url: "https://images.unsplash.com/photo-1525548002014-e18135d814d7?q=80&w=1200",
-    ingredients: [{ amount: "500g", item: "Kartoffeln" }, { amount: "300g", item: "Blattspinat" }, { amount: "2", item: "Eier" }, { amount: "1 Prise", item: "Muskatnuss" }],
-    steps: ["Kartoffeln schälen und kochen.", "Spinat mit einer Prise Muskatnuss andünsten.", "Spiegeleier braten.", "Zusammen anrichten und servieren."]
-  }
-];
+import { useRecipes } from "@/hooks/useRecipes";
 
 export default function HomeSwipePage() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const { recipes: allRecipes, isLoaded, updateRecipe } = useRecipes();
+  const [deck, setDeck] = useState<Recipe[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [openedRecipe, setOpenedRecipe] = useState<Recipe | null>(null);
 
   // Initialize deck
   useEffect(() => {
-    // Shuffle the array to make it random at start
-    const shuffled = [...GERMAN_CLASSICS].sort(() => 0.5 - Math.random());
-    // Duplicate the deck a few times so the user doesn't run out of swipes quickly for this demo
-    setRecipes([...shuffled, ...shuffled, ...shuffled]);
-  }, []);
+    if (isLoaded && allRecipes.length > 0) {
+      // Shuffle the array to make it random at start
+      const shuffled = [...allRecipes].sort(() => 0.5 - Math.random());
+      // Duplicate the deck a few times so the user doesn't run out of swipes quickly for this demo
+      setDeck([...shuffled, ...shuffled, ...shuffled]);
+    }
+  }, [allRecipes, isLoaded]);
 
-  const currentRecipe = recipes[currentIndex];
+  const currentRecipe = deck[currentIndex];
 
   const handleSwipeComplete = (direction: "left" | "right") => {
     if (direction === "right" && currentRecipe) {
@@ -62,7 +49,9 @@ export default function HomeSwipePage() {
             <XIcon className="w-5 h-5" /> Schließen
           </ChunkyButton>
           <ChunkyButton variant="secondary" size="sm" className="gap-2" onClick={() => {
-            console.log("Favorited from full view:", openedRecipe.title);
+            if (openedRecipe) {
+              updateRecipe({ ...openedRecipe, is_favorite: true });
+            }
             setOpenedRecipe(null);
           }}>
             <Heart className="w-5 h-5 fill-white" /> Speichern
@@ -70,7 +59,10 @@ export default function HomeSwipePage() {
         </div>
 
         <div className="flex-1 w-full max-w-3xl mx-auto z-10 overflow-y-auto pb-20">
-          <RecipeCard recipe={openedRecipe} />
+          <RecipeCard recipe={openedRecipe} onFavorite={(id, fav) => {
+            updateRecipe({ ...openedRecipe, is_favorite: fav });
+            setOpenedRecipe({ ...openedRecipe, is_favorite: fav });
+          }} />
         </div>
       </main>
     )
@@ -118,7 +110,7 @@ export default function HomeSwipePage() {
       <div className="flex-1 w-full max-w-md mx-auto relative flex items-center justify-center p-6 z-10 perspective-[1000px]">
 
         {/* Empty State if out of cards */}
-        {currentIndex >= recipes.length && (
+        {currentIndex >= deck.length && (
           <TreasureCard variant="gold" className="text-center">
             <Sparkles className="w-16 h-16 text-ruby-700 mx-auto mb-4" />
             <h2 className="text-2xl font-black text-ruby-900 mb-4 uppercase">Keine Rezepte mehr!</h2>
@@ -129,7 +121,7 @@ export default function HomeSwipePage() {
         {/* The Card Stack */}
         <div className="relative w-full h-[60vh] max-h-[600px]">
           <AnimatePresence>
-            {recipes.map((recipe, index) => {
+            {deck.map((recipe, index) => {
               if (index < currentIndex || index > currentIndex + 2) return null; // Show top 3 cards max
 
               const isTop = index === currentIndex;

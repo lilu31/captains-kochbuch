@@ -8,9 +8,11 @@ import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
 import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useRecipes } from "@/hooks/useRecipes";
 
 export default function CookupPage() {
     const MOCK_CURRENT_USER_ID = "user-1";
+    const { addRecipe } = useRecipes();
     const [ingredients, setIngredients] = useState<string[]>([]);
     const [steps, setSteps] = useState<string[]>([]);
     const [currentInput, setCurrentInput] = useState("");
@@ -78,27 +80,32 @@ export default function CookupPage() {
             const generatedTitle = data.title || recipeTitle || "Neues Rezept";
             const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(generatedTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
 
-            setRecipe({
+            const newRecipe = {
                 id: `generated-${Date.now()}`,
                 title: generatedTitle,
                 image_url: imagePreview || aiImageUrl,
                 ingredients: data.ingredients || ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: data.steps || steps,
                 creator_id: MOCK_CURRENT_USER_ID
-            });
+            };
+
+            setRecipe(newRecipe);
+            addRecipe(newRecipe);
         } catch (error) {
             console.error(error);
             const fallbackTitle = recipeTitle || "Nautischer Eintopf";
             const fallbackImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
-            // Fallback
-            setRecipe({
+            const fallbackRecipe = {
                 id: `generated-${Date.now()}`,
                 title: fallbackTitle,
                 image_url: imagePreview || fallbackImageUrl,
                 ingredients: ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: steps.length > 0 ? steps : ["Zubereitung fehlt."],
                 creator_id: MOCK_CURRENT_USER_ID
-            });
+            };
+            // Fallback
+            setRecipe(fallbackRecipe);
+            addRecipe(fallbackRecipe);
         } finally {
             setIsLoading(false);
         }

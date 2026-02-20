@@ -8,42 +8,31 @@ import { ArrowLeft, BookOpen, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-// Mock saved recipe
-const SAVED_RECIPE: Recipe = {
-    id: "fav-1",
-    title: "Kartoffeln mit Spinat und Spiegelei",
-    image_url: "https://images.unsplash.com/photo-1525548002014-e18135d814d7?q=80&w=1200",
-    is_favorite: true,
-    creator_id: "user-1",
-    ingredients: [
-        { amount: "500g", item: "Kartoffeln" },
-        { amount: "300g", item: "Blattspinat" },
-        { amount: "2", item: "Eier" },
-        { amount: "1 Prise", item: "Muskatnuss" }
-    ],
-    steps: [
-        "Kartoffeln schälen und in Salzwasser kochen, bis sie weich sind.",
-        "Spinat in einer Pfanne andünsten und mit Salz, Pfeffer und einer Prise Muskatnuss abschmecken.",
-        "In der Zwischenzeit die Spiegeleier in einer separaten Pfanne braten.",
-        "Kartoffeln, Spinat und Spiegeleier zusammen auf einem Teller anrichten und servieren."
-    ]
-};
+import { useRecipes } from "@/hooks/useRecipes";
 
 export default function ProfilePage() {
     const MOCK_CURRENT_USER_ID = "user-1";
-    const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([SAVED_RECIPE]);
+    const { recipes, isLoaded, updateRecipe, deleteRecipe } = useRecipes();
+
+    // Only show recipes that the user favorited OR created themselves
+    const savedRecipes = recipes.filter(r => r.is_favorite || r.creator_id === MOCK_CURRENT_USER_ID);
 
     const handleDelete = (id: string) => {
-        setSavedRecipes(savedRecipes.filter(r => r.id !== id));
+        deleteRecipe(id);
     };
 
     const handleFavorite = (id: string, isFav: boolean) => {
-        setSavedRecipes(savedRecipes.map(r => r.id === id ? { ...r, is_favorite: isFav } : r));
+        const target = recipes.find(r => r.id === id);
+        if (target) {
+            updateRecipe({ ...target, is_favorite: isFav });
+        }
     };
 
     const handleEdit = (updatedRecipe: Recipe) => {
-        setSavedRecipes(savedRecipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r));
+        updateRecipe(updatedRecipe);
     };
+
+    if (!isLoaded) return null;
 
     return (
         <main className="min-h-screen p-4 md:p-8 flex flex-col relative overflow-hidden bg-ruby-900">
