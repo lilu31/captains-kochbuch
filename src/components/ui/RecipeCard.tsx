@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { TreasureCard } from "./TreasureCard";
-import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus, GripVertical } from "lucide-react";
+import { Clock, ChefHat, Anchor, Heart, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus, GripVertical } from "lucide-react";
 import { ChunkyButton } from "./ChunkyButton";
 
 export interface Recipe {
@@ -176,7 +176,7 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                             onClick={() => onFavorite?.(recipe.id, !recipe.is_favorite)}
                             className="p-3 rounded-xl bg-black/50 backdrop-blur-md border-2 border-gold-500 hover:bg-black/70 transition transform hover:scale-110 active:scale-95"
                         >
-                            <Anchor className={`w-6 h-6 ${recipe.is_favorite ? 'text-gold-500 fill-gold-500 text-glow-gold' : 'text-gold-100'}`} />
+                            <Heart className={`w-6 h-6 ${recipe.is_favorite ? 'text-gold-500 fill-gold-500 text-glow-gold' : 'text-gold-100'}`} />
                         </button>
                     </div>
                 )}
