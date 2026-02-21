@@ -37,13 +37,15 @@ export async function POST(req: Request) {
 Du erhältst einen unstrukturierten Rohtext von einer Koch-Website. Deine Aufgabe ist es, daraus das Rezept zu extrahieren.
 Finde den Titel, die Zutaten (inklusive Mengen) und die Zubereitungsschritte.
 Ignoriere Werbung, Kommentare oder unwichtige Texte der Website.
-Formatiere das Ergebnis in ein vollständiges, strukturiertes Rezept. 
+Formatiere das Ergebnis in ein vollständiges, strukturiertes Rezept. Analysiere außerdem die Zutaten, um festzustellen, ob das Gericht vegetarisch (ohne Fleisch/Fisch) und/oder vegan (komplett ohne tierische Produkte) ist.
 Erwähne niemals, dass du eine KI bist.
 Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt im folgenden Format, ohne Markdown-Formatierung:
 {
   "title": "Gefundener Rezepttitel",
   "ingredients": [{"amount": "Menge", "item": "Zutat"}],
-  "steps": ["Schritt 1", "Schritt 2"]
+  "steps": ["Schritt 1", "Schritt 2"],
+  "is_vegetarian": true/false,
+  "is_vegan": true/false
 }`;
 
         const userPrompt = `Extrahiere das Rezept aus diesem Website-Text:\n\n${truncatedText}`;

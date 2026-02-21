@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation, AnimatePresence, PanInfo } from "framer-motion";
-import { Heart, X as XIcon, Menu, ChefHat, Sparkles, Ship } from "lucide-react";
+import { Heart, X as XIcon, Menu, ChefHat, Sparkles, Ship, Leaf } from "lucide-react";
 import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import Link from "next/link";
@@ -33,15 +33,26 @@ export default function HomeSwipePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [openedRecipe, setOpenedRecipe] = useState<Recipe | null>(null);
 
+  const [filterVeg, setFilterVeg] = useState(false);
+  const [filterVegan, setFilterVegan] = useState(false);
+
   // Initialize deck
   useEffect(() => {
     if (isLoaded && allRecipes.length > 0) {
+      let filtered = [...allRecipes];
+      if (filterVegan) {
+        filtered = filtered.filter(val => val.is_vegan);
+      } else if (filterVeg) {
+        filtered = filtered.filter(val => val.is_vegetarian || val.is_vegan);
+      }
+
       // Shuffle the array to make it random at start
-      const shuffled = [...allRecipes].sort(() => 0.5 - Math.random());
+      const shuffled = filtered.sort(() => 0.5 - Math.random());
       // Duplicate the deck a few times so the user doesn't run out of swipes quickly for this demo
       setDeck([...shuffled, ...shuffled, ...shuffled]);
+      setCurrentIndex(0); // Reset index on filter change
     }
-  }, [allRecipes, isLoaded]);
+  }, [allRecipes, isLoaded, filterVeg, filterVegan]);
 
   const currentRecipe = deck[currentIndex];
 
@@ -130,7 +141,21 @@ export default function HomeSwipePage() {
       </header>
 
       {/* Main Swipe Area */}
-      <div className="flex-1 w-full max-w-md mx-auto relative flex items-center justify-center p-6 z-10 perspective-[1000px]">
+      <div className="flex-1 w-full max-w-md mx-auto relative flex flex-col items-center justify-center p-6 z-10 perspective-[1000px]">
+
+        {/* Filters */}
+        <div className="flex gap-3 mb-6 w-full justify-center z-20">
+          <button
+            onClick={() => { setFilterVeg(!filterVeg); if (!filterVeg) setFilterVegan(false); }}
+            className={`flex items-center gap-1 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border-2 transition shadow-lg ${filterVeg ? 'bg-green-600 text-white border-green-400' : 'bg-black/40 text-green-100 border-white/20 hover:bg-black/60 backdrop-blur-sm'}`}>
+            <Leaf className="w-3 h-3" /> Veggie
+          </button>
+          <button
+            onClick={() => { setFilterVegan(!filterVegan); if (!filterVegan) setFilterVeg(false); }}
+            className={`flex items-center gap-1 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border-2 transition shadow-lg ${filterVegan ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-black/40 text-emerald-100 border-white/20 hover:bg-black/60 backdrop-blur-sm'}`}>
+            <Leaf className="w-3 h-3" /> Vegan
+          </button>
+        </div>
 
         {/* Empty State if out of cards */}
         {isLoaded && currentIndex >= deck.length && (

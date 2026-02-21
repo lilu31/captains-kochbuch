@@ -14,6 +14,8 @@ create table public.recipes (
   portions integer default 4,
   is_system_recipe boolean default false,
   author_email text,
+  is_vegetarian boolean default false,
+  is_vegan boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

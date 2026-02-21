@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import { TreasureCard } from "./TreasureCard";
-import { Clock, ChefHat, Anchor, Heart, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus, GripVertical } from "lucide-react";
+import { Clock, ChefHat, Anchor, Heart, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus, GripVertical, Leaf } from "lucide-react";
 import { ChunkyButton } from "./ChunkyButton";
 
 export interface Recipe {
@@ -16,6 +16,8 @@ export interface Recipe {
     creator_id?: string;
     author_email?: string;
     is_system_recipe?: boolean;
+    is_vegetarian?: boolean;
+    is_vegan?: boolean;
 }
 
 interface RecipeCardProps {
@@ -37,6 +39,8 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
     const [editSteps, setEditSteps] = useState([...recipe.steps]);
     const [editImageUrl, setEditImageUrl] = useState(recipe.image_url);
     const [editPortions, setEditPortions] = useState(recipe.portions || 4);
+    const [editVeg, setEditVeg] = useState(recipe.is_vegetarian || false);
+    const [editVegan, setEditVegan] = useState(recipe.is_vegan || false);
 
     // Portions state (for viewing)
     const originalPortions = recipe.portions || 4;
@@ -81,7 +85,9 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                 ingredients: editIngredients,
                 steps: editSteps,
                 image_url: editImageUrl,
-                portions: editPortions
+                portions: editPortions,
+                is_vegetarian: editVeg,
+                is_vegan: editVegan
             });
         }
         setIsEditing(false);
@@ -183,13 +189,41 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
 
                 <div className="absolute bottom-6 left-6 right-6">
                     {isEditing ? (
-                        <input
-                            value={editTitle}
-                            onChange={e => setEditTitle(e.target.value)}
-                            className="text-3xl md:text-4xl font-black text-white bg-black/60 border-2 border-gold-500 rounded-lg p-2 w-full mb-2 focus:outline-none focus:border-gold-300 shadow-inner"
-                        />
+                        <div className="flex flex-col gap-3 mb-2">
+                            <input
+                                value={editTitle}
+                                onChange={e => setEditTitle(e.target.value)}
+                                className="text-3xl md:text-4xl font-black text-white bg-black/60 border-2 border-gold-500 rounded-lg p-2 w-full focus:outline-none focus:border-gold-300 shadow-inner"
+                            />
+                            <div className="flex gap-4 items-center">
+                                <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 p-2 rounded-lg border border-gold-900 shadow-inner">
+                                    <input type="checkbox" checked={editVeg} onChange={e => setEditVeg(e.target.checked)} className="accent-gold-500 w-5 h-5 cursor-pointer" />
+                                    Vegetarisch
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 p-2 rounded-lg border border-gold-900 shadow-inner">
+                                    <input type="checkbox" checked={editVegan} onChange={e => setEditVegan(e.target.checked)} className="accent-gold-500 w-5 h-5 cursor-pointer" />
+                                    Vegan
+                                </label>
+                            </div>
+                        </div>
                     ) : (
-                        <h2 className="text-3xl md:text-4xl font-black text-gold-500 text-glow-gold uppercase tracking-wider mb-2 drop-shadow-lg">{recipe.title}</h2>
+                        <div className="flex flex-col gap-2 mb-2">
+                            {(recipe.is_vegetarian || recipe.is_vegan) && (
+                                <div className="flex gap-2">
+                                    {recipe.is_vegetarian && !recipe.is_vegan && (
+                                        <span className="bg-green-600/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-green-400/50 backdrop-blur-sm">
+                                            <Leaf className="w-3 h-3" /> Veggie
+                                        </span>
+                                    )}
+                                    {recipe.is_vegan && (
+                                        <span className="bg-emerald-500/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-emerald-300/50 backdrop-blur-sm">
+                                            <Leaf className="w-3 h-3" /> Vegan
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <h2 className="text-3xl md:text-4xl font-black text-gold-500 text-glow-gold uppercase tracking-wider drop-shadow-lg">{recipe.title}</h2>
+                        </div>
                     )}
                     <div className="flex flex-wrap items-center gap-4 text-gold-100 text-sm font-bold uppercase tracking-wide">
                         <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner"><Clock className="w-4 h-4 text-gold-300" /> ca. 30 Min</div>

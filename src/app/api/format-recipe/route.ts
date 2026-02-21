@@ -6,13 +6,15 @@ export async function POST(req: Request) {
 
         const systemPrompt = `Du bist ein hilfreicher Assistent im Hintergrund einer Rezept-App. 
 Du erhältst Rohdaten für ein Rezept (Titel, Zutaten, evt. grobe Schritte). Formatiere diese in ein vollständiges, strukturiertes Rezept. 
-Ergänze fehlende Standard-Schritte oder logische Mengenangaben sinnvoll. 
+Ergänze fehlende Standard-Schritte oder logische Mengenangaben sinnvoll. Analysiere außerdem die Zutaten, um festzustellen, ob das Gericht vegetarisch (ohne Fleisch/Fisch) und/oder vegan (komplett ohne tierische Produkte) ist.
 Erwähne niemals, dass du eine KI bist oder dass du den Text formatiert hast.
 Antworte AUSSCHLIESSLICH mit einem validen JSON-Objekt im folgenden Format, ohne Markdown-Formatierung oder Erklärungen drumherum:
 {
   "title": "Formatierter Titel",
   "ingredients": [{"amount": "Menge", "item": "Zutat"}],
-  "steps": ["Schritt 1", "Schritt 2"]
+  "steps": ["Schritt 1", "Schritt 2"],
+  "is_vegetarian": true/false,
+  "is_vegan": true/false
 }`;
 
         const userPrompt = `Titel: ${title || 'Nicht angegeben'}
