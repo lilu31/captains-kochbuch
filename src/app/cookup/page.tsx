@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
-import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship } from "lucide-react";
+import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRecipes } from "@/hooks/useRecipes";
@@ -34,6 +34,8 @@ export default function CookupPage() {
     const [currentStep, setCurrentStep] = useState("");
     const [recipeTitle, setRecipeTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const [importUrl, setImportUrl] = useState("");
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -73,24 +75,42 @@ export default function CookupPage() {
     };
 
     const handleCookup = async () => {
-        if (ingredients.length === 0 && steps.length === 0 && !imagePreview) return;
+        if (ingredients.length === 0 && steps.length === 0 && !imagePreview && !importUrl) return;
 
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/format-recipe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: recipeTitle,
-                    ingredients,
-                    steps
-                })
-            });
+            let data;
 
-            if (!res.ok) throw new Error("API Fehler");
+            // If URL is provided, try importing first
+            if (importUrl) {
+                setIsImporting(true);
+                const importRes = await fetch('/api/import-recipe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: importUrl })
+                });
 
-            const data = await res.json();
+                if (!importRes.ok) {
+                    throw new Error("Fehler beim Importieren der URL");
+                }
+
+                data = await importRes.json();
+            } else {
+                // Otherwise format manual input
+                const res = await fetch('/api/format-recipe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: recipeTitle,
+                        ingredients,
+                        steps
+                    })
+                });
+
+                if (!res.ok) throw new Error("API Fehler");
+                data = await res.json();
+            }
 
             const generatedTitle = data.title || recipeTitle || "Neues Rezept";
             const aiImageUrl = `https://pollinations.ai/p/${encodeURIComponent(generatedTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
@@ -123,6 +143,7 @@ export default function CookupPage() {
             addRecipe(fallbackRecipe);
         } finally {
             setIsLoading(false);
+            setIsImporting(false);
         }
     };
 
@@ -159,10 +180,33 @@ export default function CookupPage() {
                         >
                             <TreasureCard variant="wood" className="p-8">
                                 <h2 className="text-3xl font-black text-gold-500 text-glow-gold uppercase tracking-wider mb-2">Neues Rezept Eintragen</h2>
-                                <p className="text-gold-100 mb-8 font-bold">Trag deine Zutaten und grobe Schritte ein. Wir formatieren und standardisieren das Rezept automatisch für dein Logbuch.</p>
+                                <p className="text-gold-100 mb-8 font-bold">Trag deine Zutaten ein oder importiere ein Rezept direkt per Link. Wir formatieren alles automatisch für dein Logbuch.</p>
+
+                                {/* URL Import */}
+                                <div className="mb-6 p-4 rounded-xl border-2 border-gold-900 bg-black/20">
+                                    <label className="block text-sky-400 font-black uppercase mb-2 flex items-center gap-2">
+                                        <LinkIcon className="w-5 h-5" /> Web-Rezept Importieren
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="url"
+                                            value={importUrl}
+                                            onChange={(e) => setImportUrl(e.target.value)}
+                                            placeholder="z.B. https://www.chefkoch.de/rezepte/..."
+                                            className="w-full bg-treasure-wood border-2 border-gold-900 rounded-lg px-4 py-3 text-white placeholder-gold-700 focus:outline-none focus:border-sky-500 transition font-bold"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gold-300 font-bold mt-2 opacity-80">Füg hier einen Link (z.B. Chefkoch) ein. Die KI liest das Rezept für dich aus!</p>
+                                </div>
+
+                                <div className="relative flex py-5 items-center">
+                                    <div className="flex-grow border-t-2 border-gold-900/50"></div>
+                                    <span className="flex-shrink-0 mx-4 text-gold-700 font-black uppercase text-sm">Oder manuell eintragen</span>
+                                    <div className="flex-grow border-t-2 border-gold-900/50"></div>
+                                </div>
 
                                 {/* Title Input */}
-                                <div className="mb-6">
+                                <div className="mb-6 mt-2">
                                     <label className="block text-gold-300 font-bold uppercase mb-2">Titel (Optional)</label>
                                     <input
                                         type="text"
