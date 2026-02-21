@@ -208,7 +208,7 @@ export default function CookupPage() {
                                             <span className="hidden sm:inline">{isImporting ? "Liest..." : "Importieren"}</span>
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gold-300 font-bold mt-2 opacity-80">Füg hier einen Link (z.B. Chefkoch) ein. Die KI liest das Rezept für dich aus!</p>
+                                    <p className="text-xs text-gold-300 font-bold mt-2 opacity-80">Füg hier einen Link (z.B. Chefkoch) ein. Das magische Kochbuch schreibt das Rezept für dich ab!</p>
                                 </div>
 
                                 <div className="relative flex py-5 items-center">
@@ -326,7 +326,6 @@ export default function CookupPage() {
                                         <div className="flex flex-col items-center text-marine-400">
                                             <Camera className="w-8 h-8 mb-2" />
                                             <p>Füge noch ein Foto vom fertigen Gericht (oder den Zutaten) hinzu!</p>
-                                            <p className="text-xs uppercase tracking-widest mt-1 opacity-70">KI-Sicht aktivieren</p>
                                         </div>
                                     )}
                                 </div>

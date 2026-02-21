@@ -9,7 +9,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "Captain's Magisches Kombüsen-Kochbuch",
-  description: "Dein nautischer Rezepte-Generator mit KI-Smutje.",
+  description: "Dein magisches nautisches Kombüsen-Kochbuch.",
 };
 
 export default function RootLayout({
