@@ -166,6 +166,7 @@ export default function HomeSwipePage() {
                   isTop={isTop}
                   indexOffset={index - currentIndex}
                   onSwipe={(dir) => handleSwipeComplete(dir)}
+                  onOpen={() => setOpenedRecipe(recipe)}
                 />
               );
             })}
@@ -184,9 +185,10 @@ interface SwipeableCardProps {
   isTop: boolean;
   indexOffset: number;
   onSwipe: (dir: "left" | "right") => void;
+  onOpen: () => void;
 }
 
-function SwipeableCard({ recipe, isTop, indexOffset, onSwipe }: SwipeableCardProps) {
+function SwipeableCard({ recipe, isTop, indexOffset, onSwipe, onOpen }: SwipeableCardProps) {
   const x = useMotionValue(0);
   // Rotate based on x
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
@@ -221,6 +223,11 @@ function SwipeableCard({ recipe, isTop, indexOffset, onSwipe }: SwipeableCardPro
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
+      onTap={() => {
+        if (isTop && Math.abs(x.get()) < 5) {
+          onOpen();
+        }
+      }}
       whileTap={{ cursor: "grabbing" }}
     >
       <TreasureCard variant="wood" className="w-full h-full p-2 cursor-grab shadow-2xl flex flex-col">
