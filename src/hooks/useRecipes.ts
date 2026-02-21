@@ -59,7 +59,9 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                         creator_id: r.user_id,
                         author_email: r.author_email,
                         portions: r.portions,
-                        is_system_recipe: r.is_system_recipe
+                        is_system_recipe: r.is_system_recipe,
+                        is_vegetarian: r.is_vegetarian || false,
+                        is_vegan: r.is_vegan || false
                     }));
                 }
 
@@ -150,11 +152,13 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
     };
 
     const updateRecipe = async (updated: Recipe) => {
-        // Optimistic UI update
-        const previousState = [...recipes];
-        const previousRecipe = recipes.find(r => r.id === updated.id);
+        // Capture previous state via functional update to avoid stale closures
+        let previousState: Recipe[] = [];
+        let previousRecipe: Recipe | undefined;
 
         setRecipes(prev => {
+            previousState = prev;
+            previousRecipe = prev.find(r => r.id === updated.id);
             const newRecipes = prev.map(r => r.id === updated.id ? updated : r);
             globalRecipesCache = newRecipes;
             return newRecipes;
