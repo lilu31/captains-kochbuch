@@ -255,22 +255,38 @@ function SwipeableCard({ recipe, isTop, indexOffset, onSwipe, onOpen }: Swipeabl
       }}
       whileTap={{ cursor: "grabbing" }}
     >
-      <TreasureCard variant="wood" className="w-full h-full p-2 cursor-grab shadow-2xl flex flex-col">
-        <div
-          className="w-full h-[65%] bg-cover bg-center rounded-2xl border-4 border-gold-900 shadow-inner relative overflow-hidden"
-          style={{ backgroundImage: `url(${recipe.image_url})` }}
-        >
-          {/* Dynamic LIKE / NOPE stamps */}
-          <motion.div style={{ opacity: opacityRight }} className="absolute top-4 left-4 border-4 border-green-500 text-green-500 font-black text-3xl px-2 py-1 rotate-[-15deg] rounded-lg bg-black/50 uppercase tracking-widest">
-            Lecker!
-          </motion.div>
-          <motion.div style={{ opacity: opacityLeft }} className="absolute top-4 right-4 border-4 border-red-500 text-red-500 font-black text-3xl px-2 py-1 rotate-[15deg] rounded-lg bg-black/50 uppercase tracking-widest">
-            Über Bord!
-          </motion.div>
-        </div>
+      <TreasureCard variant="wood" className="w-full h-full p-2 cursor-grab shadow-2xl flex flex-col relative">
+        {/* Dynamic LIKE / NOPE stamps - at card level so they show with or without image */}
+        <motion.div style={{ opacity: opacityRight }} className="absolute top-4 left-4 z-20 border-4 border-green-500 text-green-500 font-black text-3xl px-2 py-1 rotate-[-15deg] rounded-lg bg-black/50 uppercase tracking-widest">
+          Lecker!
+        </motion.div>
+        <motion.div style={{ opacity: opacityLeft }} className="absolute top-4 right-4 z-20 border-4 border-red-500 text-red-500 font-black text-3xl px-2 py-1 rotate-[15deg] rounded-lg bg-black/50 uppercase tracking-widest">
+          Über Bord!
+        </motion.div>
 
-        <div className="flex-1 p-4 flex flex-col justify-between">
+        {recipe.image_url && (
+          <div
+            className="w-full h-[65%] bg-cover bg-center rounded-2xl border-4 border-gold-900 shadow-inner relative overflow-hidden shrink-0"
+            style={{ backgroundImage: `url(${recipe.image_url})` }}
+          />
+        )}
+
+        <div className="flex-1 p-4 flex flex-col justify-between overflow-hidden">
           <div>
+            {(recipe.is_vegetarian || recipe.is_vegan) && (
+              <div className="flex gap-2 mb-2">
+                {recipe.is_vegetarian && !recipe.is_vegan && (
+                  <span className="bg-green-600/90 text-white text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1 shadow-md border border-green-400/50">
+                    🌱 Veggie
+                  </span>
+                )}
+                {recipe.is_vegan && (
+                  <span className="bg-emerald-500/90 text-white text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1 shadow-md border border-emerald-300/50">
+                    🌿 Vegan
+                  </span>
+                )}
+              </div>
+            )}
             <h2 className="text-2xl font-black text-gold-500 text-glow-gold uppercase leading-tight mb-2 tracking-wide">{recipe.title}</h2>
             <div className="bg-treasure-wood-dark p-3 rounded-xl border border-gold-900/50">
               <h3 className="text-gold-300 font-bold uppercase text-sm mb-1 tracking-wider">Zutaten</h3>
