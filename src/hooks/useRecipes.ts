@@ -19,6 +19,10 @@ export const GERMAN_CLASSICS: Recipe[] = [
     }
 ];
 
+// Global cache to prevent redundant fetches on route navigation
+let globalRecipesCache: Recipe[] | null = null;
+let globalCachedUserId: string | null | undefined = undefined;
+
 export function useRecipes(userId?: string | null, userEmail?: string | null) {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -27,6 +31,14 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
         let isMounted = true;
 
         const fetchRecipes = async () => {
+            if (globalRecipesCache && globalCachedUserId === userId) {
+                if (isMounted) {
+                    setRecipes(globalRecipesCache);
+                    setIsLoaded(true);
+                }
+                return;
+            }
+
             try {
                 // 1. Fetch system recipes and user's own recipes
                 let query = supabase.from('recipes').select('*');
@@ -73,6 +85,8 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                 }
 
                 if (isMounted) {
+                    globalRecipesCache = mergedRecipes;
+                    globalCachedUserId = userId;
                     setRecipes(mergedRecipes);
                     setIsLoaded(true);
                 }
@@ -95,7 +109,12 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
         // Optimistic UI update
         const tempId = `temp-${Date.now()}`;
         const newRecipe = { ...recipe, id: tempId, creator_id: userId, author_email: userEmail || undefined };
-        setRecipes(prev => [newRecipe as Recipe, ...prev]);
+
+        setRecipes(prev => {
+            const updated = [newRecipe as Recipe, ...prev];
+            globalRecipesCache = updated;
+            return updated;
+        });
 
         if (!userId) return; // Must be logged in to save to DB
 
@@ -120,7 +139,11 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
             setRecipes(prev => prev.filter(r => r.id !== tempId));
         } else if (data) {
             // Replace temp ID with real DB UUID
-            setRecipes(prev => prev.map(r => r.id === tempId ? { ...r, id: data.id } : r));
+            setRecipes(prev => {
+                const updated = prev.map(r => r.id === tempId ? { ...r, id: data.id } : r);
+                globalRecipesCache = updated;
+                return updated;
+            });
         }
     };
 
@@ -129,7 +152,11 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
         const previousState = [...recipes];
         const previousRecipe = recipes.find(r => r.id === updated.id);
 
-        setRecipes(prev => prev.map(r => r.id === updated.id ? updated : r));
+        setRecipes(prev => {
+            const newRecipes = prev.map(r => r.id === updated.id ? updated : r);
+            globalRecipesCache = newRecipes;
+            return newRecipes;
+        });
 
         if (!userId) return;
 
@@ -157,7 +184,11 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                 finalRecipeId = newRecipeData.id;
 
                 // Update the local state to point to the new ID so future edits work
-                setRecipes(prev => prev.map(r => r.id === updated.id ? { ...updated, id: finalRecipeId, is_system_recipe: false, creator_id: userId } : r));
+                setRecipes(prev => {
+                    const newRecipes = prev.map(r => r.id === updated.id ? { ...updated, id: finalRecipeId, is_system_recipe: false, creator_id: userId } : r);
+                    globalRecipesCache = newRecipes;
+                    return newRecipes;
+                });
             }
 
             // Check if favorite status changed
@@ -189,13 +220,18 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
             console.error("Error updating recipe:", error);
             // Revert optimistic update
             setRecipes(previousState);
+            globalRecipesCache = previousState;
         }
     }
 
     const deleteRecipe = async (id: string) => {
         // Optimistic UI update
         const previousState = [...recipes];
-        setRecipes(prev => prev.filter(r => r.id !== id));
+        setRecipes(prev => {
+            const next = prev.filter(r => r.id !== id);
+            globalRecipesCache = next;
+            return next;
+        });
 
         if (!userId || String(id).startsWith('system-')) return;
 
