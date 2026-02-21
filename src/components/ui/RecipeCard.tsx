@@ -62,8 +62,9 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
         });
     };
 
-    // Track image loading state to show spinner for slow AI generation
-    const currentDisplayImage = isEditing ? editImageUrl : (recipe.image_url || 'https://images.unsplash.com/photo-1548811579-017fc2a7ea68?q=80&w=1200');
+    // Track image loading state
+    const currentDisplayImage = isEditing ? editImageUrl : recipe.image_url;
+    const hasImage = !!currentDisplayImage;
     const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,9 +132,9 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
 
     return (
         <TreasureCard variant="wood" className="max-w-3xl w-full mx-auto p-0 overflow-hidden relative border-4 border-gold-900">
-            {/* Header Image */}
-            <div className="w-full h-80 md:h-[450px] relative border-b-4 border-gold-900 overflow-hidden bg-treasure-wood-dark">
-                {currentDisplayImage && (
+            {/* Header Image — only shown when recipe has an image */}
+            {hasImage ? (
+                <div className="w-full h-80 md:h-[450px] relative border-b-4 border-gold-900 overflow-hidden bg-treasure-wood-dark">
                     <Image
                         src={currentDisplayImage}
                         alt={recipe.title}
@@ -144,69 +145,123 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                         onLoad={() => setImageLoaded(true)}
                         onError={() => setImageLoaded(true)}
                     />
-                )}
-                {!imageLoaded && currentDisplayImage && (
-                    <div className="absolute inset-0 bg-treasure-wood-dark/50 animate-pulse" />
-                )}
+                    {!imageLoaded && (
+                        <div className="absolute inset-0 bg-treasure-wood-dark/50 animate-pulse" />
+                    )}
 
-                {!imageLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-treasure-wood-dark">
-                        <RefreshCw className="w-8 h-8 text-gold-500 animate-spin mb-2" />
-                        <span className="text-gold-300 font-bold uppercase tracking-widest text-xs">Malt Bild...</span>
-                    </div>
-                )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-ruby-900 via-transparent to-transparent opacity-90" />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-ruby-900 via-transparent to-transparent opacity-90" />
+                    {isEditing && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10 transition">
+                            <label className="cursor-pointer p-4 bg-black/60 border-2 border-gold-500 rounded-xl text-gold-300 hover:text-white hover:bg-black/80 transition flex flex-col items-center">
+                                <Camera className="w-8 h-8 mb-2" />
+                                <span className="font-bold">Bild Ändern</span>
+                                <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+                            </label>
+                        </div>
+                    )}
 
-                {isEditing && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-10 transition">
-                        <label className="cursor-pointer p-4 bg-black/60 border-2 border-gold-500 rounded-xl text-gold-300 hover:text-white hover:bg-black/80 transition flex flex-col items-center">
-                            <Camera className="w-8 h-8 mb-2" />
-                            <span className="font-bold">Bild Ändern</span>
-                            <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
-                        </label>
-                    </div>
-                )}
-
-                {showActions && (
-                    <div className="absolute top-4 right-4 flex gap-2">
-                        {isCreator && !isEditing && (
+                    {showActions && (
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            {isCreator && !isEditing && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="p-3 rounded-xl bg-black/50 backdrop-blur-md border-2 border-sky-500 hover:bg-black/70 transition transform hover:scale-110 active:scale-95 text-sky-400"
+                                >
+                                    <Edit2 className="w-6 h-6" />
+                                </button>
+                            )}
                             <button
-                                onClick={() => setIsEditing(true)}
-                                className="p-3 rounded-xl bg-black/50 backdrop-blur-md border-2 border-sky-500 hover:bg-black/70 transition transform hover:scale-110 active:scale-95 text-sky-400"
+                                onClick={() => onFavorite?.(recipe.id, !recipe.is_favorite)}
+                                className="p-3 rounded-xl bg-black/50 backdrop-blur-md border-2 border-gold-500 hover:bg-black/70 transition transform hover:scale-110 active:scale-95"
                             >
-                                <Edit2 className="w-6 h-6" />
+                                <Heart className={`w-6 h-6 ${recipe.is_favorite ? 'text-gold-500 fill-gold-500 text-glow-gold' : 'text-gold-100'}`} />
                             </button>
-                        )}
-                        <button
-                            onClick={() => onFavorite?.(recipe.id, !recipe.is_favorite)}
-                            className="p-3 rounded-xl bg-black/50 backdrop-blur-md border-2 border-gold-500 hover:bg-black/70 transition transform hover:scale-110 active:scale-95"
-                        >
-                            <Heart className={`w-6 h-6 ${recipe.is_favorite ? 'text-gold-500 fill-gold-500 text-glow-gold' : 'text-gold-100'}`} />
-                        </button>
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                <div className="absolute bottom-6 left-6 right-6">
+                    <div className="absolute bottom-6 left-6 right-6">
+                        {isEditing ? (
+                            <div className="flex flex-col gap-3 mb-2">
+                                <input
+                                    value={editTitle}
+                                    onChange={e => setEditTitle(e.target.value)}
+                                    className="text-3xl md:text-4xl font-black text-white bg-black/60 border-2 border-gold-500 rounded-lg p-2 w-full focus:outline-none focus:border-gold-300 shadow-inner"
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2 mb-2">
+                                {(recipe.is_vegetarian || recipe.is_vegan) && (
+                                    <div className="flex gap-2">
+                                        {recipe.is_vegetarian && !recipe.is_vegan && (
+                                            <span className="bg-green-600/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-green-400/50 backdrop-blur-sm">
+                                                <Leaf className="w-3 h-3" /> Veggie
+                                            </span>
+                                        )}
+                                        {recipe.is_vegan && (
+                                            <span className="bg-emerald-500/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-emerald-300/50 backdrop-blur-sm">
+                                                <Leaf className="w-3 h-3" /> Vegan
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                <h2 className="text-3xl md:text-4xl font-black text-gold-500 text-glow-gold uppercase tracking-wider drop-shadow-lg">{recipe.title}</h2>
+                            </div>
+                        )}
+                        <div className="flex flex-wrap items-center gap-4 text-gold-100 text-sm font-bold uppercase tracking-wide">
+                            <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner"><Clock className="w-4 h-4 text-gold-300" /> ca. 30 Min</div>
+                            <div className="flex items-center gap-1 bg-ruby-900/80 px-3 py-1.5 rounded-lg border border-ruby-700 shadow-inner">
+                                <ChefHat className="w-4 h-4 text-gold-300" /> {recipe.author_email ? recipe.author_email.split('@')[0] : (recipe.is_system_recipe ? "Smutje Klassiker" : "Unbekannter Matrose")}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                /* No-image header: compact title bar with action buttons */
+                <div className="p-6 pb-4 bg-ruby-900 border-b-4 border-gold-900 relative">
+                    {showActions && (
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            {isCreator && !isEditing && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="p-3 rounded-xl bg-black/30 backdrop-blur-md border-2 border-sky-500 hover:bg-black/50 transition transform hover:scale-110 active:scale-95 text-sky-400"
+                                >
+                                    <Edit2 className="w-6 h-6" />
+                                </button>
+                            )}
+                            <button
+                                onClick={() => onFavorite?.(recipe.id, !recipe.is_favorite)}
+                                className="p-3 rounded-xl bg-black/30 backdrop-blur-md border-2 border-gold-500 hover:bg-black/50 transition transform hover:scale-110 active:scale-95"
+                            >
+                                <Heart className={`w-6 h-6 ${recipe.is_favorite ? 'text-gold-500 fill-gold-500 text-glow-gold' : 'text-gold-100'}`} />
+                            </button>
+                        </div>
+                    )}
+
                     {isEditing ? (
-                        <div className="flex flex-col gap-3 mb-2">
+                        <div className="flex flex-col gap-3 mb-2 pr-24">
                             <input
                                 value={editTitle}
                                 onChange={e => setEditTitle(e.target.value)}
-                                className="text-3xl md:text-4xl font-black text-white bg-black/60 border-2 border-gold-500 rounded-lg p-2 w-full focus:outline-none focus:border-gold-300 shadow-inner"
+                                className="text-3xl md:text-4xl font-black text-white bg-black/40 border-2 border-gold-500 rounded-lg p-2 w-full focus:outline-none focus:border-gold-300 shadow-inner"
                             />
+                            <label className="cursor-pointer self-start p-3 bg-black/40 border-2 border-gold-500 rounded-xl text-gold-300 hover:text-white hover:bg-black/60 transition flex items-center gap-2">
+                                <Camera className="w-5 h-5" />
+                                <span className="font-bold text-sm">Bild hinzufügen</span>
+                                <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+                            </label>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-2 mb-2">
+                        <div className="flex flex-col gap-2 mb-2 pr-24">
                             {(recipe.is_vegetarian || recipe.is_vegan) && (
                                 <div className="flex gap-2">
                                     {recipe.is_vegetarian && !recipe.is_vegan && (
-                                        <span className="bg-green-600/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-green-400/50 backdrop-blur-sm">
+                                        <span className="bg-green-600/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-green-400/50">
                                             <Leaf className="w-3 h-3" /> Veggie
                                         </span>
                                     )}
                                     {recipe.is_vegan && (
-                                        <span className="bg-emerald-500/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-emerald-300/50 backdrop-blur-sm">
+                                        <span className="bg-emerald-500/90 text-white text-xs font-black uppercase tracking-widest px-2 py-1 rounded flex items-center gap-1 shadow-md border border-emerald-300/50">
                                             <Leaf className="w-3 h-3" /> Vegan
                                         </span>
                                     )}
@@ -222,7 +277,7 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-treasure-wood">
                 <div className="md:w-1/3">

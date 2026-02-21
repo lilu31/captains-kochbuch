@@ -86,7 +86,6 @@ export default function CookupPage() {
             if (skipFormatting && !importUrl) {
                 // Save raw input directly without API formatting
                 const rawTitle = recipeTitle || "Neues Rezept";
-                const rawImageUrl = imagePreview || `https://pollinations.ai/p/${encodeURIComponent(rawTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
 
                 // Simple local veg/vegan guess based on common non-veg ingredients
                 const allIngs = ingredients.join(' ').toLowerCase();
@@ -98,7 +97,7 @@ export default function CookupPage() {
                 const directRecipe = {
                     id: `generated-${Date.now()}`,
                     title: rawTitle,
-                    image_url: rawImageUrl,
+                    image_url: imagePreview || "",
                     ingredients: ingredients.map(i => ({ amount: "", item: i })),
                     steps: steps.length > 0 ? steps : ["Zubereitung siehe Originalrezept."],
                     creator_id: userId || undefined,
@@ -145,12 +144,11 @@ export default function CookupPage() {
             }
 
             const generatedTitle = data.title || recipeTitle || "Neues Rezept";
-            const aiImageUrl = `https://pollinations.ai/p/${encodeURIComponent(generatedTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
 
             const newRecipe = {
                 id: `generated-${Date.now()}`,
                 title: generatedTitle,
-                image_url: imagePreview || aiImageUrl,
+                image_url: imagePreview || "",
                 ingredients: data.ingredients || ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: data.steps || steps,
                 creator_id: userId || undefined,
@@ -164,11 +162,10 @@ export default function CookupPage() {
         } catch (error) {
             console.error(error);
             const fallbackTitle = recipeTitle || "Nautischer Eintopf";
-            const fallbackImageUrl = `https://pollinations.ai/p/${encodeURIComponent(fallbackTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
             const fallbackRecipe = {
                 id: `generated-${Date.now()}`,
                 title: fallbackTitle,
-                image_url: imagePreview || fallbackImageUrl,
+                image_url: imagePreview || "",
                 ingredients: ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: steps.length > 0 ? steps : ["Zubereitung fehlt."],
                 creator_id: userId || undefined,

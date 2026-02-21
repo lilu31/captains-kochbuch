@@ -264,7 +264,7 @@ function SwipeableCard({ recipe, isTop, indexOffset, onSwipe, onOpen }: Swipeabl
           Über Bord!
         </motion.div>
 
-        {recipe.image_url && (
+        {recipe.image_url && recipe.image_url.trim() !== '' && !recipe.image_url.startsWith('data:,') && (
           <div
             className="w-full h-[65%] bg-cover bg-center rounded-2xl border-4 border-gold-900 shadow-inner relative overflow-hidden shrink-0"
             style={{ backgroundImage: `url(${recipe.image_url})` }}
