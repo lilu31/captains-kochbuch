@@ -10,6 +10,7 @@ export interface Recipe {
     ingredients: { amount: string; item: string }[];
     steps: string[];
     image_url: string;
+    portions?: number;
     is_favorite?: boolean;
     creator_id?: string;
     author_email?: string;
@@ -34,6 +35,27 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
     const [editIngredients, setEditIngredients] = useState([...recipe.ingredients]);
     const [editSteps, setEditSteps] = useState([...recipe.steps]);
     const [editImageUrl, setEditImageUrl] = useState(recipe.image_url);
+    const [editPortions, setEditPortions] = useState(recipe.portions || 4);
+
+    // Portions state (for viewing)
+    const originalPortions = recipe.portions || 4;
+    const [viewPortions, setViewPortions] = useState(originalPortions);
+    const portionMultiplier = viewPortions / originalPortions;
+
+    // Helper to scale ingredient amounts
+    const scaleAmount = (amountStr: string, multiplier: number) => {
+        if (multiplier === 1) return amountStr;
+
+        // Match numbers (including decimals/fractions if possible, but keep it simple for now)
+        return amountStr.replace(/(\d+(?:[.,]\d+)?)/g, (match) => {
+            const num = parseFloat(match.replace(',', '.'));
+            if (isNaN(num)) return match;
+
+            const scaled = num * multiplier;
+            // Format cleanly (no trailing zeros, max 2 decimals)
+            return Number.isInteger(scaled) ? scaled.toString() : scaled.toFixed(2).replace('.', ',');
+        });
+    };
 
     // Track image loading state to show spinner for slow AI generation
     const currentDisplayImage = isEditing ? editImageUrl : (recipe.image_url || 'https://images.unsplash.com/photo-1548811579-017fc2a7ea68?q=80&w=1200');
@@ -57,7 +79,8 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                 title: editTitle,
                 ingredients: editIngredients,
                 steps: editSteps,
-                image_url: editImageUrl
+                image_url: editImageUrl,
+                portions: editPortions
             });
         }
         setIsEditing(false);
@@ -158,9 +181,32 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
 
             <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-treasure-wood">
                 <div className="md:w-1/3">
-                    <h3 className="text-xl font-black text-gold-300 mb-4 flex items-center gap-2 uppercase tracking-widest border-b-2 border-gold-900/30 pb-2">
-                        <Anchor className="w-6 h-6 text-gold-500" /> Zutaten
-                    </h3>
+                    <div className="flex items-center justify-between mb-4 border-b-2 border-gold-900/30 pb-2">
+                        <h3 className="text-xl font-black text-gold-300 flex items-center gap-2 uppercase tracking-widest">
+                            <Anchor className="w-6 h-6 text-gold-500" /> Zutaten
+                        </h3>
+
+                        {/* Portions Stepper */}
+                        <div className="flex items-center bg-ruby-900/80 rounded-lg border border-ruby-700 shadow-inner overflow-hidden">
+                            {isEditing ? (
+                                <>
+                                    <button onClick={() => setEditPortions(Math.max(1, editPortions - 1))} className="px-2 py-1 text-gold-500 hover:bg-ruby-800 hover:text-white transition font-black">-</button>
+                                    <div className="px-2 py-1 text-sm font-bold text-gold-100 min-w-[3rem] text-center border-x border-ruby-700/50">
+                                        {editPortions} <span className="text-xs opacity-80">Port.</span>
+                                    </div>
+                                    <button onClick={() => setEditPortions(editPortions + 1)} className="px-2 py-1 text-gold-500 hover:bg-ruby-800 hover:text-white transition font-black">+</button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={() => setViewPortions(Math.max(1, viewPortions - 1))} className="px-2 py-1 text-gold-500 hover:bg-ruby-800 hover:text-white transition font-black">-</button>
+                                    <div className="px-2 py-1 text-sm font-bold text-gold-100 min-w-[3rem] text-center border-x border-ruby-700/50">
+                                        {viewPortions} <span className="text-xs opacity-80">Port.</span>
+                                    </div>
+                                    <button onClick={() => setViewPortions(viewPortions + 1)} className="px-2 py-1 text-gold-500 hover:bg-ruby-800 hover:text-white transition font-black">+</button>
+                                </>
+                            )}
+                        </div>
+                    </div>
                     <ul className="space-y-3">
                         {isEditing ? (
                             editIngredients.map((ing, idx) => (
@@ -172,7 +218,9 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                         ) : (
                             recipe.ingredients.map((ing, idx) => (
                                 <li key={idx} className="flex flex-col border-b border-gold-900/30 pb-2">
-                                    <span className="text-gold-100 font-bold uppercase text-xs">{ing.amount}</span>
+                                    <span className="text-gold-100 font-bold uppercase text-xs">
+                                        {scaleAmount(ing.amount, portionMultiplier)}
+                                    </span>
                                     <span className="text-white font-black text-lg">{ing.item}</span>
                                 </li>
                             ))

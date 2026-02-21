@@ -46,6 +46,7 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                         steps: r.steps,
                         creator_id: r.user_id,
                         author_email: r.author_email,
+                        portions: r.portions,
                         is_system_recipe: r.is_system_recipe
                     }));
                 }
@@ -107,6 +108,7 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                 steps: recipe.steps,
                 image_url: recipe.image_url,
                 author_email: userEmail || undefined,
+                portions: recipe.portions,
                 is_system_recipe: false
             })
             .select()
@@ -149,7 +151,8 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                         title: updated.title,
                         ingredients: updated.ingredients,
                         steps: updated.steps,
-                        image_url: updated.image_url
+                        image_url: updated.image_url,
+                        portions: updated.portions
                     })
                     .eq('id', updated.id)
                     .eq('user_id', userId);

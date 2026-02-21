@@ -121,7 +121,8 @@ export default function CookupPage() {
                 image_url: imagePreview || aiImageUrl,
                 ingredients: data.ingredients || ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: data.steps || steps,
-                creator_id: userId || undefined
+                creator_id: userId || undefined,
+                portions: 4
             };
 
             setRecipe(newRecipe);
@@ -136,7 +137,8 @@ export default function CookupPage() {
                 image_url: imagePreview || fallbackImageUrl,
                 ingredients: ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: steps.length > 0 ? steps : ["Zubereitung fehlt."],
-                creator_id: userId || undefined
+                creator_id: userId || undefined,
+                portions: 4
             };
             // Fallback
             setRecipe(fallbackRecipe);

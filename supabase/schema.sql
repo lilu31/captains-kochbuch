@@ -11,6 +11,7 @@ create table public.recipes (
   ingredients jsonb not null,
   steps jsonb not null,
   image_url text,
+  portions integer default 4,
   is_system_recipe boolean default false,
   author_email text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
