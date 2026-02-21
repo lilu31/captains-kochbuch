@@ -87,9 +87,9 @@ export default function HomeSwipePage() {
   return (
     <main className="min-h-screen relative flex flex-col pt-4 overflow-hidden bg-ruby-900">
       {/* Background pattern/rays to make it feel like an excited game */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center opacity-30 pointer-events-none">
+      <div className="absolute inset-0 z-0 flex items-center justify-center opacity-30 pointer-events-none overflow-hidden">
         <div
-          className="w-[200vw] h-[200vw] absolute animate-spin-slow"
+          className="w-[300vmax] h-[300vmax] absolute animate-spin-slow transform-gpu will-change-transform"
           style={{
             background: "conic-gradient(from 0deg, transparent 0deg 15deg, var(--color-gold-500) 15deg 30deg, transparent 30deg 45deg, var(--color-gold-500) 45deg 60deg, transparent 60deg 75deg, var(--color-gold-500) 75deg 90deg, transparent 90deg 105deg, var(--color-gold-500) 105deg 120deg, transparent 120deg 135deg, var(--color-gold-500) 135deg 150deg, transparent 150deg 165deg, var(--color-gold-500) 165deg 180deg, transparent 180deg 195deg, var(--color-gold-500) 195deg 210deg, transparent 210deg 225deg, var(--color-gold-500) 225deg 240deg, transparent 240deg 255deg, var(--color-gold-500) 255deg 270deg, transparent 270deg 285deg, var(--color-gold-500) 285deg 300deg, transparent 300deg 315deg, var(--color-gold-500) 315deg 330deg, transparent 330deg 345deg, var(--color-gold-500) 345deg 360deg)"
           }}
