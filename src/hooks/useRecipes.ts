@@ -134,10 +134,36 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
         if (!userId) return;
 
         try {
+            // Check if it's a system recipe being saved/favorited
+            let finalRecipeId = updated.id;
+
+            if (updated.is_system_recipe && previousRecipe?.is_favorite !== updated.is_favorite && updated.is_favorite) {
+                // Clone the system recipe for the user
+                const { data: newRecipeData, error: cloneError } = await supabase
+                    .from('recipes')
+                    .insert({
+                        user_id: userId,
+                        title: updated.title,
+                        ingredients: updated.ingredients,
+                        steps: updated.steps,
+                        image_url: updated.image_url,
+                        portions: updated.portions,
+                        is_system_recipe: false
+                    })
+                    .select()
+                    .single();
+
+                if (cloneError) throw cloneError;
+                finalRecipeId = newRecipeData.id;
+
+                // Update the local state to point to the new ID so future edits work
+                setRecipes(prev => prev.map(r => r.id === updated.id ? { ...updated, id: finalRecipeId, is_system_recipe: false, creator_id: userId } : r));
+            }
+
             // Check if favorite status changed
             if (previousRecipe && previousRecipe.is_favorite !== updated.is_favorite) {
                 if (updated.is_favorite) {
-                    await supabase.from('favorites').insert({ user_id: userId, recipe_id: updated.id });
+                    await supabase.from('favorites').insert({ user_id: userId, recipe_id: finalRecipeId });
                 } else {
                     await supabase.from('favorites').delete().eq('user_id', userId).eq('recipe_id', updated.id);
                 }
