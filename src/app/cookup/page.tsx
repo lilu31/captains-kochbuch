@@ -195,6 +195,15 @@ export default function CookupPage() {
                                             placeholder="z.B. https://www.chefkoch.de/rezepte/..."
                                             className="w-full bg-treasure-wood border-2 border-gold-900 rounded-lg px-4 py-3 text-white placeholder-gold-700 focus:outline-none focus:border-sky-500 transition font-bold"
                                         />
+                                        <button
+                                            onClick={handleCookup}
+                                            disabled={!importUrl || isLoading || isImporting}
+                                            className="px-4 sm:px-6 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
+                                            type="button"
+                                        >
+                                            {isImporting ? <Ship className="w-5 h-5 animate-pulse" /> : <LinkIcon className="w-5 h-5" />}
+                                            <span className="hidden sm:inline">{isImporting ? "Liest..." : "Importieren"}</span>
+                                        </button>
                                     </div>
                                     <p className="text-xs text-gold-300 font-bold mt-2 opacity-80">Füg hier einen Link (z.B. Chefkoch) ein. Die KI liest das Rezept für dich aus!</p>
                                 </div>
