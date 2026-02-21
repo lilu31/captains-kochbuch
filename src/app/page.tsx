@@ -80,21 +80,6 @@ export default function HomeSwipePage() {
             background: "conic-gradient(from 0deg, transparent 0deg 15deg, var(--color-gold-500) 15deg 30deg, transparent 30deg 45deg, var(--color-gold-500) 45deg 60deg, transparent 60deg 75deg, var(--color-gold-500) 75deg 90deg, transparent 90deg 105deg, var(--color-gold-500) 105deg 120deg, transparent 120deg 135deg, var(--color-gold-500) 135deg 150deg, transparent 150deg 165deg, var(--color-gold-500) 165deg 180deg, transparent 180deg 195deg, var(--color-gold-500) 195deg 210deg, transparent 210deg 225deg, var(--color-gold-500) 225deg 240deg, transparent 240deg 255deg, var(--color-gold-500) 255deg 270deg, transparent 270deg 285deg, var(--color-gold-500) 285deg 300deg, transparent 300deg 315deg, var(--color-gold-500) 315deg 330deg, transparent 330deg 345deg, var(--color-gold-500) 345deg 360deg)"
           }}
         />
-
-        {/* Circling Smutje Sticker */}
-        <motion.div
-          className="absolute left-1/2 top-1/2 w-[80vmin] h-[80vmin] -ml-[40vmin] -mt-[40vmin] pointer-events-none z-10"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        >
-          <motion.div
-            className="absolute top-0 left-1/2 -ml-24 w-48 h-48"
-            animate={{ rotate: -360 }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          >
-            <img src="/images/smutje_sticker.png" alt="Smutje" className="w-full h-full object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,1)]" />
-          </motion.div>
-        </motion.div>
       </div>
 
       {/* Top Nav */}
@@ -206,7 +191,7 @@ function SwipeableCard({ recipe, isTop, indexOffset, onSwipe }: SwipeableCardPro
     >
       <TreasureCard variant="wood" className="w-full h-full p-2 cursor-grab shadow-2xl flex flex-col">
         <div
-          className="w-full h-1/2 bg-contain bg-no-repeat bg-center rounded-2xl border-4 border-gold-900 shadow-inner relative overflow-hidden bg-black/50"
+          className="w-full h-[65%] bg-cover bg-center rounded-2xl border-4 border-gold-900 shadow-inner relative overflow-hidden"
           style={{ backgroundImage: `url(${recipe.image_url})` }}
         >
           {/* Dynamic LIKE / NOPE stamps */}
