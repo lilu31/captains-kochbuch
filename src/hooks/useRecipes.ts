@@ -128,7 +128,9 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                 image_url: recipe.image_url,
                 author_email: userEmail || undefined,
                 portions: recipe.portions,
-                is_system_recipe: false
+                is_system_recipe: false,
+                is_vegetarian: recipe.is_vegetarian || false,
+                is_vegan: recipe.is_vegan || false
             })
             .select()
             .single();
@@ -175,7 +177,9 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                         steps: updated.steps,
                         image_url: updated.image_url,
                         portions: updated.portions,
-                        is_system_recipe: false
+                        is_system_recipe: false,
+                        is_vegetarian: updated.is_vegetarian || false,
+                        is_vegan: updated.is_vegan || false
                     })
                     .select()
                     .single();
@@ -209,7 +213,9 @@ export function useRecipes(userId?: string | null, userEmail?: string | null) {
                         ingredients: updated.ingredients,
                         steps: updated.steps,
                         image_url: updated.image_url,
-                        portions: updated.portions
+                        portions: updated.portions,
+                        is_vegetarian: updated.is_vegetarian || false,
+                        is_vegan: updated.is_vegan || false
                     })
                     .eq('id', updated.id)
                     .eq('user_id', userId);

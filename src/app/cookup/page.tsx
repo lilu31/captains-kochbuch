@@ -123,7 +123,9 @@ export default function CookupPage() {
                 ingredients: data.ingredients || ingredients.map(i => ({ amount: "1 Portion", item: i })),
                 steps: data.steps || steps,
                 creator_id: userId || undefined,
-                portions: 4
+                portions: 4,
+                is_vegetarian: data.is_vegetarian || false,
+                is_vegan: data.is_vegan || false
             };
 
             setRecipe(newRecipe);
