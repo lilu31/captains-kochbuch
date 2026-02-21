@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useState } from "react";
+import Image from "next/image";
 import { TreasureCard } from "./TreasureCard";
-import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus } from "lucide-react";
+import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus, GripVertical } from "lucide-react";
 import { ChunkyButton } from "./ChunkyButton";
 
 export interface Recipe {
@@ -125,18 +126,22 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
     return (
         <TreasureCard variant="wood" className="max-w-3xl w-full mx-auto p-0 overflow-hidden relative border-4 border-gold-900">
             {/* Header Image */}
-            <div
-                className="w-full h-80 md:h-[450px] bg-treasure-wood-dark bg-cover bg-center relative border-b-4 border-gold-900 overflow-hidden"
-                style={{ backgroundImage: imageLoaded ? `url(${currentDisplayImage})` : 'none' }}
-            >
-                {/* Hidden image just to trigger onLoad */}
-                <img
-                    src={currentDisplayImage}
-                    alt={recipe.title}
-                    className="hidden"
-                    onLoad={() => setImageLoaded(true)}
-                    onError={() => setImageLoaded(true)} // Fallback if it fails so it doesn't spin forever
-                />
+            <div className="w-full h-80 md:h-[450px] relative border-b-4 border-gold-900 overflow-hidden bg-treasure-wood-dark">
+                {currentDisplayImage && (
+                    <Image
+                        src={currentDisplayImage}
+                        alt={recipe.title}
+                        fill
+                        className="object-cover object-center"
+                        sizes="(max-width: 768px) 100vw, 768px"
+                        priority
+                        onLoad={() => setImageLoaded(true)}
+                        onError={() => setImageLoaded(true)}
+                    />
+                )}
+                {!imageLoaded && currentDisplayImage && (
+                    <div className="absolute inset-0 bg-treasure-wood-dark/50 animate-pulse" />
+                )}
 
                 {!imageLoaded && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-treasure-wood-dark">

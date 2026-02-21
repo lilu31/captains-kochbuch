@@ -10,6 +10,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRecipes } from "@/hooks/useRecipes";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 import { useEffect } from "react";
 
 export default function CookupPage() {
@@ -316,7 +317,9 @@ export default function CookupPage() {
                                     />
                                     {imagePreview ? (
                                         <div className="flex flex-col items-center">
-                                            <img src={imagePreview} alt="Preview" className="w-32 h-48 object-cover rounded-lg mb-2 shadow-md" />
+                                            <div className="relative w-32 h-48 mb-2">
+                                                <Image src={imagePreview} alt="Preview" fill className="object-cover rounded-lg shadow-md" />
+                                            </div>
                                             <span className="text-sail-gray text-sm">Bild ändern</span>
                                         </div>
                                     ) : (
