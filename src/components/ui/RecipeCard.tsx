@@ -181,7 +181,7 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
 
             <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-treasure-wood">
                 <div className="md:w-1/3">
-                    <div className="flex items-center justify-between mb-4 border-b-2 border-gold-900/30 pb-2">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b-2 border-gold-900/30 pb-2">
                         <h3 className="text-xl font-black text-gold-300 flex items-center gap-2 uppercase tracking-widest">
                             <Anchor className="w-6 h-6 text-gold-500" /> Zutaten
                         </h3>
