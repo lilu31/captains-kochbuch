@@ -126,7 +126,7 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
         <TreasureCard variant="wood" className="max-w-3xl w-full mx-auto p-0 overflow-hidden relative border-4 border-gold-900">
             {/* Header Image */}
             <div
-                className="w-full h-64 bg-treasure-wood-dark bg-cover bg-center relative border-b-4 border-gold-900 overflow-hidden"
+                className="w-full h-64 bg-treasure-wood-dark bg-contain bg-no-repeat bg-center relative border-b-4 border-gold-900 overflow-hidden"
                 style={{ backgroundImage: imageLoaded ? `url(${currentDisplayImage})` : 'none' }}
             >
                 {/* Hidden image just to trigger onLoad */}

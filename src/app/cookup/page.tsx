@@ -316,7 +316,7 @@ export default function CookupPage() {
                                     />
                                     {imagePreview ? (
                                         <div className="flex flex-col items-center">
-                                            <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg mb-2 shadow-md" />
+                                            <img src={imagePreview} alt="Preview" className="w-32 h-32 object-contain bg-black/50 rounded-lg mb-2 shadow-md" />
                                             <span className="text-sail-gray text-sm">Bild ändern</span>
                                         </div>
                                     ) : (
