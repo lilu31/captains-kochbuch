@@ -93,6 +93,11 @@ export default function HomeSwipePage() {
           </h1>
         </div>
         <div className="flex gap-2 md:gap-3 shrink-0">
+          <Link href="/favorites">
+            <ChunkyButton variant="nav" size="sm" className="px-3 md:px-4">
+              <Heart className="w-5 h-5 text-ruby-500 fill-ruby-500" />
+            </ChunkyButton>
+          </Link>
           <Link href="/cookup">
             <ChunkyButton variant="nav" size="sm" className="gap-2 px-3 md:px-4">
               <ChefHat className="w-5 h-5" /> <span className="hidden md:inline">Kochen</span>
