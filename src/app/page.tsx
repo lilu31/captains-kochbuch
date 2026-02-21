@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useAnimation, AnimatePresence, PanInfo } from "framer-motion";
-import { Heart, X as XIcon, Menu, ChefHat, Sparkles } from "lucide-react";
+import { Heart, X as XIcon, Menu, ChefHat, Sparkles, Ship } from "lucide-react";
 import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import Link from "next/link";
@@ -129,12 +129,23 @@ export default function HomeSwipePage() {
       <div className="flex-1 w-full max-w-md mx-auto relative flex items-center justify-center p-6 z-10 perspective-[1000px]">
 
         {/* Empty State if out of cards */}
-        {currentIndex >= deck.length && (
+        {isLoaded && currentIndex >= deck.length && (
           <TreasureCard variant="gold" className="text-center">
             <Sparkles className="w-16 h-16 text-ruby-700 mx-auto mb-4" />
             <h2 className="text-2xl font-black text-ruby-900 mb-4 uppercase">Keine Rezepte mehr!</h2>
             <ChunkyButton onClick={() => setCurrentIndex(0)}>Neues Deck mischen</ChunkyButton>
           </TreasureCard>
+        )}
+
+        {/* Loading State */}
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none">
+            <TreasureCard variant="wood" className="w-full max-w-sm flex flex-col items-center justify-center py-12 animate-pulse border-4 border-gold-900 pointer-events-auto">
+              <Ship className="w-16 h-16 text-gold-500 mb-4 animate-bounce" />
+              <h2 className="text-2xl font-black text-gold-300 uppercase tracking-widest text-center">Setze Segel...</h2>
+              <p className="text-gold-100/50 mt-2 font-bold text-sm">Rezepte werden geladen</p>
+            </TreasureCard>
+          </div>
         )}
 
         {/* The Card Stack */}

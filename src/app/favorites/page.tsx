@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
-import { ArrowLeft, Heart } from "lucide-react";
+import { ArrowLeft, Heart, Ship } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -49,9 +49,17 @@ export default function FavoritesPage() {
         updateRecipe(updatedRecipe);
     };
 
-    if (!userId || !recipesLoaded) return null; // Wait for auth and DB to load
-
-    return (
+    if (!userId || !recipesLoaded) {
+        return (
+            <main className="min-h-screen p-4 md:p-8 flex items-center justify-center bg-ruby-900">
+                <TreasureCard variant="wood" className="w-full max-w-sm flex flex-col items-center justify-center py-12 animate-pulse border-4 border-gold-900">
+                    <Ship className="w-16 h-16 text-gold-500 mb-4 animate-bounce" />
+                    <h2 className="text-2xl font-black text-gold-300 uppercase tracking-widest text-center">Setze Segel...</h2>
+                    <p className="text-gold-100/50 mt-2 font-bold text-sm">Favoriten werden geladen</p>
+                </TreasureCard>
+            </main>
+        );
+    } return (
         <main className="min-h-screen p-4 md:p-8 flex flex-col relative overflow-hidden bg-ruby-900">
             {/* Background */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-[-1]">
