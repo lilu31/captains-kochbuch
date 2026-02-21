@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TreasureCard } from "@/components/ui/TreasureCard";
 import { ChunkyButton } from "@/components/ui/ChunkyButton";
 import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
-import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, ChefHat, Camera, Plus, Trash2, Sailboat, Ship, Link as LinkIcon, Save, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRecipes } from "@/hooks/useRecipes";
@@ -75,13 +75,44 @@ export default function CookupPage() {
         }
     };
 
-    const handleCookup = async () => {
+    const handleCookup = async (skipFormatting = false) => {
         if (ingredients.length === 0 && steps.length === 0 && !imagePreview && !importUrl) return;
 
         setIsLoading(true);
 
         try {
             let data;
+
+            if (skipFormatting && !importUrl) {
+                // Save raw input directly without API formatting
+                const rawTitle = recipeTitle || "Neues Rezept";
+                const rawImageUrl = imagePreview || `https://pollinations.ai/p/${encodeURIComponent(rawTitle + " 3d cartoon style delicious food shiny vibrant colorful")}?width=1200&height=800&nologo=true`;
+
+                // Simple local veg/vegan guess based on common non-veg ingredients
+                const allIngs = ingredients.join(' ').toLowerCase();
+                const meatKeywords = ['fleisch', 'huhn', 'hähnchen', 'rind', 'schwein', 'lachs', 'fisch', 'thunfisch', 'speck', 'schinken', 'wurst', 'hack', 'chicken', 'beef', 'pork', 'bacon', 'garnelen', 'shrimp', 'ente', 'lamm', 'gelatine', 'anchovis'];
+                const dairyKeywords = ['milch', 'käse', 'butter', 'sahne', 'quark', 'joghurt', 'ei', 'eier', 'honig', 'cream', 'cheese', 'milk', 'egg', 'schmand', 'crème'];
+                const hasMeat = meatKeywords.some(k => allIngs.includes(k));
+                const hasDairy = dairyKeywords.some(k => allIngs.includes(k));
+
+                const directRecipe = {
+                    id: `generated-${Date.now()}`,
+                    title: rawTitle,
+                    image_url: rawImageUrl,
+                    ingredients: ingredients.map(i => ({ amount: "", item: i })),
+                    steps: steps.length > 0 ? steps : ["Zubereitung siehe Originalrezept."],
+                    creator_id: userId || undefined,
+                    portions: 4,
+                    is_vegetarian: !hasMeat,
+                    is_vegan: !hasMeat && !hasDairy
+                };
+
+                setRecipe(directRecipe);
+                addRecipe(directRecipe);
+                setIsLoading(false);
+                setIsImporting(false);
+                return;
+            }
 
             // If URL is provided, try importing first
             if (importUrl) {
@@ -201,7 +232,7 @@ export default function CookupPage() {
                                             className="w-full bg-treasure-wood border-2 border-gold-900 rounded-lg px-4 py-3 text-white placeholder-gold-700 focus:outline-none focus:border-sky-500 transition font-bold"
                                         />
                                         <button
-                                            onClick={handleCookup}
+                                            onClick={() => handleCookup()}
                                             disabled={!importUrl || isLoading || isImporting}
                                             className="px-4 sm:px-6 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
                                             type="button"
@@ -332,15 +363,27 @@ export default function CookupPage() {
                                     )}
                                 </div>
 
-                                <ChunkyButton
-                                    size="lg"
-                                    className="w-full"
-                                    onClick={handleCookup}
-                                    disabled={ingredients.length === 0 && steps.length === 0 && !imagePreview}
-                                >
-                                    <Ship className="w-8 h-8" />
-                                    Rezept speichern & formatieren
-                                </ChunkyButton>
+                                <div className="flex gap-3 w-full">
+                                    <ChunkyButton
+                                        size="lg"
+                                        className="flex-1"
+                                        onClick={() => handleCookup(true)}
+                                        disabled={ingredients.length === 0 && steps.length === 0 && !imagePreview}
+                                        variant="secondary"
+                                    >
+                                        <Save className="w-6 h-6" />
+                                        Direkt speichern
+                                    </ChunkyButton>
+                                    <ChunkyButton
+                                        size="lg"
+                                        className="flex-1"
+                                        onClick={() => handleCookup(false)}
+                                        disabled={ingredients.length === 0 && steps.length === 0 && !imagePreview}
+                                    >
+                                        <Sparkles className="w-6 h-6" />
+                                        Magisch formatieren
+                                    </ChunkyButton>
+                                </div>
                             </TreasureCard>
                         </motion.div>
                     ) : isLoading ? (
