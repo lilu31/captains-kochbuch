@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { TreasureCard } from "./TreasureCard";
-import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw } from "lucide-react";
+import { Clock, ChefHat, Anchor, Trash2, Edit2, Save, X, Camera, RefreshCw, Plus } from "lucide-react";
 import { ChunkyButton } from "./ChunkyButton";
 
 export interface Recipe {
@@ -104,6 +104,22 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
         const newSteps = [...editSteps];
         newSteps[index] = value;
         setEditSteps(newSteps);
+    };
+
+    const addEditIngredient = () => {
+        setEditIngredients([...editIngredients, { amount: "", item: "" }]);
+    };
+
+    const removeEditIngredient = (index: number) => {
+        setEditIngredients(editIngredients.filter((_, idx) => idx !== index));
+    };
+
+    const addEditStep = () => {
+        setEditSteps([...editSteps, ""]);
+    };
+
+    const removeEditStep = (index: number) => {
+        setEditSteps(editSteps.filter((_, idx) => idx !== index));
     };
 
     return (
@@ -209,12 +225,20 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                     </div>
                     <ul className="space-y-3">
                         {isEditing ? (
-                            editIngredients.map((ing, idx) => (
-                                <li key={idx} className="flex gap-2">
-                                    <input value={ing.amount} onChange={e => updateIngredient(idx, 'amount', e.target.value)} className="w-1/3 bg-treasure-wood-dark text-gold-100 p-2 rounded border border-gold-900/50 text-xs font-bold uppercase focus:border-gold-500 focus:outline-none" />
-                                    <input value={ing.item} onChange={e => updateIngredient(idx, 'item', e.target.value)} className="w-2/3 bg-treasure-wood-dark text-white p-2 rounded border border-gold-900/50 text-sm font-black focus:border-gold-500 focus:outline-none" />
-                                </li>
-                            ))
+                            <>
+                                {editIngredients.map((ing, idx) => (
+                                    <li key={idx} className="flex gap-2 items-center">
+                                        <input value={ing.amount} onChange={e => updateIngredient(idx, 'amount', e.target.value)} placeholder="Menge" className="w-1/3 bg-treasure-wood-dark text-gold-100 p-2 rounded border border-gold-900/50 text-xs font-bold uppercase focus:border-gold-500 focus:outline-none" />
+                                        <input value={ing.item} onChange={e => updateIngredient(idx, 'item', e.target.value)} placeholder="Zutat" className="w-full bg-treasure-wood-dark text-white p-2 rounded border border-gold-900/50 text-sm font-black focus:border-gold-500 focus:outline-none" />
+                                        <button onClick={() => removeEditIngredient(idx)} className="p-2 text-ruby-700 hover:text-ruby-500 hover:bg-ruby-900/30 rounded border border-transparent hover:border-ruby-700/50 transition">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </li>
+                                ))}
+                                <button onClick={addEditIngredient} className="w-full py-2 mt-2 flex items-center justify-center gap-2 text-gold-300 font-bold border-2 border-dashed border-gold-900/50 hover:border-gold-500/50 hover:bg-gold-900/10 rounded-lg transition text-sm uppercase">
+                                    <Plus className="w-4 h-4" /> Zutat hinzufügen
+                                </button>
+                            </>
                         ) : (
                             recipe.ingredients.map((ing, idx) => (
                                 <li key={idx} className="flex flex-col border-b border-gold-900/30 pb-2">
@@ -234,14 +258,24 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                     </h3>
                     <ol className="space-y-4">
                         {isEditing ? (
-                            editSteps.map((step, idx) => (
-                                <li key={idx} className="flex gap-4">
-                                    <span className="flex-shrink-0 w-10 h-10 rounded-full bg-ruby-700 border-2 border-gold-500 flex items-center justify-center text-gold-100 font-black shadow-lg">
-                                        {idx + 1}
-                                    </span>
-                                    <textarea value={step} onChange={e => updateStep(idx, e.target.value)} className="w-full bg-treasure-wood-dark text-gold-100 p-2 rounded border border-gold-900/50 text-sm font-bold min-h-[60px] focus:border-gold-500 focus:outline-none" />
-                                </li>
-                            ))
+                            <>
+                                {editSteps.map((step, idx) => (
+                                    <li key={idx} className="flex gap-3 items-start">
+                                        <span className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-ruby-700 border-2 border-gold-500 flex items-center justify-center text-gold-100 font-black shadow-lg">
+                                            {idx + 1}
+                                        </span>
+                                        <div className="flex-grow flex gap-2">
+                                            <textarea value={step} onChange={e => updateStep(idx, e.target.value)} placeholder="Zubereitungsschritt..." className="w-full bg-treasure-wood-dark text-gold-100 p-3 rounded border border-gold-900/50 text-sm font-bold min-h-[80px] focus:border-gold-500 focus:outline-none resize-y" />
+                                            <button onClick={() => removeEditStep(idx)} className="p-2 self-start mt-1 text-ruby-700 hover:text-ruby-500 hover:bg-ruby-900/30 rounded border border-transparent hover:border-ruby-700/50 transition">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+                                <button onClick={addEditStep} className="w-full py-3 mt-4 flex items-center justify-center gap-2 text-gold-300 font-bold border-2 border-dashed border-gold-900/50 hover:border-gold-500/50 hover:bg-gold-900/10 rounded-lg transition text-sm uppercase">
+                                    <Plus className="w-5 h-5" /> Schritt hinzufügen
+                                </button>
+                            </>
                         ) : (
                             recipe.steps.map((step, idx) => (
                                 <li key={idx} className="flex gap-4">
