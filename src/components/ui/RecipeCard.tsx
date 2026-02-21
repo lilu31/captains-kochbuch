@@ -195,16 +195,6 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
                                 onChange={e => setEditTitle(e.target.value)}
                                 className="text-3xl md:text-4xl font-black text-white bg-black/60 border-2 border-gold-500 rounded-lg p-2 w-full focus:outline-none focus:border-gold-300 shadow-inner"
                             />
-                            <div className="flex gap-4 items-center">
-                                <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 p-2 rounded-lg border border-gold-900 shadow-inner">
-                                    <input type="checkbox" checked={editVeg} onChange={e => setEditVeg(e.target.checked)} className="accent-gold-500 w-5 h-5 cursor-pointer" />
-                                    Vegetarisch
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 p-2 rounded-lg border border-gold-900 shadow-inner">
-                                    <input type="checkbox" checked={editVegan} onChange={e => setEditVegan(e.target.checked)} className="accent-gold-500 w-5 h-5 cursor-pointer" />
-                                    Vegan
-                                </label>
-                            </div>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2 mb-2">
@@ -235,6 +225,19 @@ export function RecipeCard({ recipe, currentUserId, onFavorite, onDelete, onEdit
             </div>
 
             <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-treasure-wood">
+                {/* Veg/Vegan toggles in edit mode - placed here so they're always visible */}
+                {isEditing && (
+                    <div className="w-full flex gap-4 items-center pb-4 border-b-2 border-gold-900/30 mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 px-4 py-3 rounded-lg border border-gold-900 shadow-inner">
+                            <input type="checkbox" checked={editVeg} onChange={e => setEditVeg(e.target.checked)} className="accent-green-500 w-5 h-5 cursor-pointer" />
+                            🌱 Vegetarisch
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-gold-100 font-bold bg-ruby-900/60 px-4 py-3 rounded-lg border border-gold-900 shadow-inner">
+                            <input type="checkbox" checked={editVegan} onChange={e => setEditVegan(e.target.checked)} className="accent-emerald-500 w-5 h-5 cursor-pointer" />
+                            🌿 Vegan
+                        </label>
+                    </div>
+                )}
                 <div className="md:w-1/3">
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b-2 border-gold-900/30 pb-2">
                         <h3 className="text-xl font-black text-gold-300 flex items-center gap-2 uppercase tracking-widest">
