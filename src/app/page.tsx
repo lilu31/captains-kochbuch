@@ -10,8 +10,24 @@ import { RecipeCard, Recipe } from "@/components/ui/RecipeCard";
 
 import { useRecipes } from "@/hooks/useRecipes";
 
+import { supabase } from "@/lib/supabase";
+
 export default function HomeSwipePage() {
-  const { recipes: allRecipes, isLoaded, updateRecipe } = useRecipes();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { recipes: allRecipes, isLoaded, updateRecipe } = useRecipes(userId, userEmail);
+
+  // Check user session
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUserId(session.user.id);
+        setUserEmail(session.user.email || null);
+      }
+    };
+    checkUser();
+  }, []);
   const [deck, setDeck] = useState<Recipe[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [openedRecipe, setOpenedRecipe] = useState<Recipe | null>(null);
